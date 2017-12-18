@@ -153,7 +153,7 @@ and add [`api_frodo640.h`](src/api_frodo640.h) and [`api_frodo976.h`](src/api_fr
 
 ## License
 
-This software is licensed under the MIT License; see License.txt for details.
+This software is licensed under the MIT License; see the LICENSE file for details.
 It includes some third party modules that are licensed differently. In particular:
 
 - `src/aes/aes_c.c`: public domain
@@ -179,7 +179,7 @@ Other contributors include:
 # References
 
 [1]  Erdem Alkim, Joppe W. Bos, Léo Ducas, Karen Easterbrook, Brian LaMacchia, Patrick Longa, Ilya Mironov, Valeria Nikolaenko, Chris Peikert, Ananth Raghunathan, and Douglas Stebila, 
-"FrodoKEM: Learning With Errors Key Encapsulation". Submission to the NIST Post-Quantum Standardization project, 2017.  
+"FrodoKEM: Learning With Errors Key Encapsulation". Submission to the NIST Post-Quantum Standardization project, 2017. The specification of FrodoKEM is available [`here`](https://frodokem.org/files/FrodoKEM-specification-20171130.pdf). 
 
 [2]  Joppe W. Bos, Craig Costello, Léo Ducas, Ilya Mironov, Michael Naehrig, Valeria Nikolaenko, Ananth Raghunathan, and Douglas Stebila, 
 "Frodo: Take off the ring! Practical, quantum-secure key exchange from LWE". 
