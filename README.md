@@ -25,7 +25,7 @@ The library was developed by [Microsoft Research](http://research.microsoft.com/
 * [`random folder`](src/random/): randombytes function using the system random number generator.
 * [`sha3 folder`](src/sha3/): cSHAKE256 implementation.  
 * [`Test folder`](tests/): test files.  
-* [`Visual Studio folder`](Visual%20Studio/): Visual Studio 2015 files for compilation in Windows.
+* [`Visual Studio folder`](VisualStudio/): Visual Studio 2015 files for compilation in Windows.
 * [`Makefile`](Makefile): Makefile for compilation using the GNU GCC or clang compilers on Unix-like operative systems. 
 * [`License`](LICENSE): MIT license file.
 * [`Readme`](README.md): this readme file.
@@ -138,7 +138,7 @@ is actually processed using `ARCH=x86 OPT_LEVEL=FAST_GENERIC`.
 
 ### Building the library with Visual Studio:
 
-Open the solution file [`frodoKEM.sln`](Visual%20Studio/frodoKEM.sln) in Visual Studio, and choose either x64 or x86 from the platform menu. 
+Open the solution file [`frodoKEM.sln`](VisualStudio/frodoKEM.sln) in Visual Studio, and choose either x64 or x86 from the platform menu. 
 Make sure `Fast_generic` is selected in the configuration menu. Finally, select "Build Solution" from the "Build" menu. 
 
 ### Running the tests:
