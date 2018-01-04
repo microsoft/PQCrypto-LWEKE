@@ -80,7 +80,7 @@
 
 
 // Defining method for generating matrix A
-#if (_AES128_FOR_A_)
+#if defined(_AES128_FOR_A_)
     #define USE_AES128_FOR_A
 #elif defined(_CSHAKE128_FOR_A_)
     #define USE_CSHAKE128_FOR_A
