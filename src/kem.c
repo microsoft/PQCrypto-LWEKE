@@ -42,8 +42,9 @@ int crypto_kem_keypair(unsigned char* pk, unsigned char* sk)
 int crypto_kem_enc(unsigned char *ct, unsigned char *ss, const unsigned char *pk)
 { // Frodo-KEM's key encapsulation
     unsigned char randomness[BYTES_MU];
-    uint16_t B[PARAMS_N*PARAMS_NBAR] = {0}, Bp[PARAMS_N*PARAMS_NBAR] = {0}, Ep[PARAMS_N*PARAMS_NBAR] = {0};
+    uint16_t B[PARAMS_N*PARAMS_NBAR] = {0},  Ep[PARAMS_N*PARAMS_NBAR] = {0};
     uint16_t Epp[PARAMS_NBAR*PARAMS_NBAR] = {0}, V[PARAMS_NBAR*PARAMS_NBAR]= {0}, C[PARAMS_NBAR*PARAMS_NBAR] = {0};
+    ALIGN_HEADER(32) uint16_t Bp[PARAMS_N*PARAMS_NBAR] ALIGN_FOOTER(32) = {0}; 
     ALIGN_HEADER(32) uint16_t Sp[PARAMS_N*PARAMS_NBAR] ALIGN_FOOTER(32) = {0}; 
     uint8_t temp[CRYPTO_CIPHERTEXTBYTES+CRYPTO_BYTES], G[3*CRYPTO_BYTES];
     
@@ -88,10 +89,11 @@ int crypto_kem_enc(unsigned char *ct, unsigned char *ss, const unsigned char *pk
 
 int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned char *sk) 
 { // Frodo-KEM's key decapsulation
-    uint16_t B[PARAMS_N*PARAMS_NBAR] = {0}, Bp[PARAMS_N*PARAMS_NBAR] = {0}, BBp[PARAMS_N*PARAMS_NBAR] = {0};
+    uint16_t B[PARAMS_N*PARAMS_NBAR] = {0}, Bp[PARAMS_N*PARAMS_NBAR] = {0};
     uint16_t Ep[PARAMS_N*PARAMS_NBAR] = {0}, Epp[PARAMS_NBAR*PARAMS_NBAR] = {0}, W[PARAMS_NBAR*PARAMS_NBAR] = {0};
     uint16_t C[PARAMS_NBAR*PARAMS_NBAR] = {0}, CC[PARAMS_NBAR*PARAMS_NBAR] = {0};
     uint16_t *S = (uint16_t*)(sk+CRYPTO_BYTES+CRYPTO_PUBLICKEYBYTES);
+    ALIGN_HEADER(32) uint16_t BBp[PARAMS_N*PARAMS_NBAR] ALIGN_FOOTER(32) = {0}; 
     ALIGN_HEADER(32) uint16_t Sp[PARAMS_N*PARAMS_NBAR] ALIGN_FOOTER(32) = {0};
     uint8_t temp[CRYPTO_CIPHERTEXTBYTES+CRYPTO_BYTES], G[3*CRYPTO_BYTES], *seed_A = temp;
     
@@ -148,5 +150,3 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
     clear_words((void*)(temp+CRYPTO_CIPHERTEXTBYTES-CRYPTO_BYTES), CRYPTO_BYTES/2);
     return 0;
 }
-
-
