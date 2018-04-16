@@ -7,12 +7,11 @@
 #include "sha3/fips202.h"
 
 
-void frodo_sample_n(uint16_t *s, const size_t n, const uint8_t *seed, const size_t s_seed, const uint16_t ctr) 
+void frodo_sample_n(uint16_t *s, const size_t n) 
 { // Fills vector s with n samples from the noise distribution which requires 16 bits to sample. 
   // The distribution is specified by its CDF.
+  // Input: pseudo-random values (2*n bytes) passed in s. The input is overwritten by the output.
     unsigned int i, j;
-
-    cshake((uint8_t*)s, n*sizeof(uint16_t), ctr, seed, (unsigned long long)s_seed);
 
     for (i = 0; i < n; ++i) {
         uint8_t sample = 0;
