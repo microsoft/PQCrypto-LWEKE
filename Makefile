@@ -35,8 +35,8 @@ endif
 USE_GENERATION_A=_AES128_FOR_A_
 ifeq "$(GENERATION_A)" "AES128_ECB"
     USE_GENERATION_A=_AES128_FOR_A_
-else ifeq "$(GENERATION_A)" "CSHAKE128"
-    USE_GENERATION_A=_CSHAKE128_FOR_A_
+else ifeq "$(GENERATION_A)" "SHAKE128"
+    USE_GENERATION_A=_SHAKE128_FOR_A_
 endif
 
 ifeq "$(ARCH)" "ARM"
@@ -94,11 +94,11 @@ RAND_OBJS := objs/random/random.o
 # KEM_FRODO
 KEM_FRODO640_OBJS := $(addprefix objs/, frodo640.o util.o)
 KEM_FRODO640_HEADERS := $(addprefix src/, api_frodo640.h config.h frodo_macrify.h)
-$(KEM_FRODO640_OBJS): $(KEM_FRODO640_HEADERS)
+$(KEM_FRODO640_OBJS): $(KEM_FRODO640_HEADERS) $(addprefix src/, kem.c noise.c util.c)
 
 KEM_FRODO976_OBJS := $(addprefix objs/, frodo976.o util.o)
 KEM_FRODO976_HEADERS := $(addprefix src/, api_frodo976.h config.h frodo_macrify.h)
-$(KEM_FRODO976_OBJS): $(KEM_FRODO976_HEADERS)
+$(KEM_FRODO976_OBJS): $(KEM_FRODO976_HEADERS) $(addprefix src/, kem.c noise.c util.c)
 
 # AES
 AES_OBJS := $(addprefix objs/aes/, aes.o aes_c.o)
@@ -114,7 +114,7 @@ ifeq "$(USE_OPT_LEVEL)" "_FAST_"
 # AES_NI
 AES_NI_OBJS := $(addprefix objs/aes/, aes_ni.o)
 
-ifeq "$(GENERATION_A)" "CSHAKE128"
+ifeq "$(GENERATION_A)" "SHAKE128"
 # SHAKEx4
 SHAKEx4_OBJS := $(addprefix objs/sha3/, fips202x4.o keccak4x/KeccakP-1600-times4-SIMD256.o)
 SHAKEx4_HEADERS := $(addprefix src/sha3/, fips202x4.h keccak4x/KeccakP-1600-times4-SnP.h)
@@ -147,9 +147,9 @@ lib976_for_KATs: $(KEM_FRODO976_OBJS) $(AES_OBJS) $(AES_NI_OBJS) $(SHAKE_OBJS) $
 	$(RANLIB) frodo976/libfrodo_for_testing.a
 
 KATS: lib640_for_KATs lib976_for_KATs
-ifeq "$(GENERATION_A)" "CSHAKE128"
-	$(CC) $(CFLAGS) -L./frodo640 tests/PQCtestKAT_kem640_cshake.c tests/rng.c -lfrodo_for_testing $(LDFLAGS) -o frodo640/PQCtestKAT_kem_cshake $(ARM_SETTING)
-	$(CC) $(CFLAGS) -L./frodo976 tests/PQCtestKAT_kem976_cshake.c tests/rng.c -lfrodo_for_testing $(LDFLAGS) -o frodo976/PQCtestKAT_kem_cshake $(ARM_SETTING)
+ifeq "$(GENERATION_A)" "SHAKE128"
+	$(CC) $(CFLAGS) -L./frodo640 tests/PQCtestKAT_kem640_shake.c tests/rng.c -lfrodo_for_testing $(LDFLAGS) -o frodo640/PQCtestKAT_kem_shake $(ARM_SETTING)
+	$(CC) $(CFLAGS) -L./frodo976 tests/PQCtestKAT_kem976_shake.c tests/rng.c -lfrodo_for_testing $(LDFLAGS) -o frodo976/PQCtestKAT_kem_shake $(ARM_SETTING)
 else
 	$(CC) $(CFLAGS) -L./frodo640 tests/PQCtestKAT_kem640.c tests/rng.c -lfrodo_for_testing $(LDFLAGS) -o frodo640/PQCtestKAT_kem $(ARM_SETTING)
 	$(CC) $(CFLAGS) -L./frodo976 tests/PQCtestKAT_kem976.c tests/rng.c -lfrodo_for_testing $(LDFLAGS) -o frodo976/PQCtestKAT_kem $(ARM_SETTING)

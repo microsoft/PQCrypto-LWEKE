@@ -21,8 +21,8 @@
 #define BYTES_MU (PARAMS_EXTRACTED_BITS*PARAMS_NBAR*PARAMS_NBAR)/8
 #define BYTES_PKHASH CRYPTO_BYTES
 
-// Selecting cSHAKE XOF function for the KEM and noise sampling
-#define cshake    cshake128_simple
+// Selecting SHAKE XOF function for the KEM and noise sampling
+#define shake     shake128
 
 // CDF table
 uint16_t CDF_TABLE[12] = {4727, 13584, 20864, 26113, 29434, 31278, 32176, 32560, 32704, 32751, 32764, 32767};

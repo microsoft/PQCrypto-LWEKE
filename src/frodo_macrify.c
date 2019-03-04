@@ -6,7 +6,7 @@
 
 #if defined(USE_AES128_FOR_A)
     #include "aes/aes.h"
-#elif defined (USE_CSHAKE128_FOR_A)
+#elif defined (USE_SHAKE128_FOR_A)
 #if defined(WINDOWS) | !defined(USE_AVX2)
     #include "sha3/fips202.h"
 #else
@@ -61,14 +61,23 @@ int frodo_mul_add_as_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
 #else   
         if (1 != EVP_EncryptUpdate(aes_key_schedule, (uint8_t*)a_row, &len, (uint8_t*)a_row_temp, 4*PARAMS_N*sizeof(int16_t))) handleErrors();
 #endif
-#elif defined (USE_CSHAKE128_FOR_A)       
+#elif defined (USE_SHAKE128_FOR_A)       
 #if defined(WINDOWS) | !defined(USE_AVX2)
+    uint8_t seed_A_separated[4 + BYTES_SEED_A];
+    seed_A_separated[0] = 0xFF;
+    seed_A_separated[1] = 0xFF;
+    memcpy(&seed_A_separated[4], seed_A, BYTES_SEED_A);
     for (i = 0; i < PARAMS_N; i += 4) {
-        cshake128_simple((unsigned char*)(a_row + 0*PARAMS_N), (unsigned long long)(2*PARAMS_N), (uint16_t)(256+i+0), seed_A, (unsigned long long)BYTES_SEED_A);
-        cshake128_simple((unsigned char*)(a_row + 1*PARAMS_N), (unsigned long long)(2*PARAMS_N), (uint16_t)(256+i+1), seed_A, (unsigned long long)BYTES_SEED_A);
-        cshake128_simple((unsigned char*)(a_row + 2*PARAMS_N), (unsigned long long)(2*PARAMS_N), (uint16_t)(256+i+2), seed_A, (unsigned long long)BYTES_SEED_A);
-        cshake128_simple((unsigned char*)(a_row + 3*PARAMS_N), (unsigned long long)(2*PARAMS_N), (uint16_t)(256+i+3), seed_A, (unsigned long long)BYTES_SEED_A);
+        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (i + 0);
+        shake128((unsigned char*)(a_row + 0*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
+        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (i + 1);
+        shake128((unsigned char*)(a_row + 1*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
+        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (i + 2);
+        shake128((unsigned char*)(a_row + 2*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
+        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (i + 3);
+        shake128((unsigned char*)(a_row + 3*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
 #else
+#error("FIXME NEED TO USE SHAKE NOT CSHAKE")
     for (i = 0; i < PARAMS_N; i += 4) {
         cshake128_simple4x((unsigned char*)(a_row), (unsigned char*)(a_row + PARAMS_N), (unsigned char*)(a_row + 2*PARAMS_N), (unsigned char*)(a_row + 3*PARAMS_N), 
                            (unsigned long long)(2*PARAMS_N), (uint16_t)(256+i), (uint16_t)(256+i+1), (uint16_t)(256+i+2), (uint16_t)(256+i+3), seed_A, (unsigned long long)BYTES_SEED_A);
@@ -200,17 +209,25 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
 #endif
     AES128_free_schedule(aes_key_schedule);
 
-#elif defined (USE_CSHAKE128_FOR_A)  // cSHAKE128
+#elif defined (USE_SHAKE128_FOR_A)  // SHAKE128
     int t=0;
     ALIGN_HEADER(32) uint16_t a_cols[4*PARAMS_N] ALIGN_FOOTER(32) = {0};
 
 #if defined(WINDOWS) | !defined(USE_AVX2)
     int k;
+    uint8_t seed_A_separated[4 + BYTES_SEED_A];
+    seed_A_separated[0] = 0xFF;
+    seed_A_separated[1] = 0xFF;
+    memcpy(&seed_A_separated[4], seed_A, BYTES_SEED_A);
     for (kk = 0; kk < PARAMS_N; kk+=4) {
-        cshake128_simple((unsigned char*)(a_cols + 0*PARAMS_N), (unsigned long long)(2*PARAMS_N), (uint16_t)(256+kk+0), seed_A, (unsigned long long)BYTES_SEED_A);
-        cshake128_simple((unsigned char*)(a_cols + 1*PARAMS_N), (unsigned long long)(2*PARAMS_N), (uint16_t)(256+kk+1), seed_A, (unsigned long long)BYTES_SEED_A);
-        cshake128_simple((unsigned char*)(a_cols + 2*PARAMS_N), (unsigned long long)(2*PARAMS_N), (uint16_t)(256+kk+2), seed_A, (unsigned long long)BYTES_SEED_A);
-        cshake128_simple((unsigned char*)(a_cols + 3*PARAMS_N), (unsigned long long)(2*PARAMS_N), (uint16_t)(256+kk+3), seed_A, (unsigned long long)BYTES_SEED_A);
+        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (kk + 0);
+        shake128((unsigned char*)(a_cols + 0*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
+        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (kk + 1);
+        shake128((unsigned char*)(a_cols + 1*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
+        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (kk + 2);
+        shake128((unsigned char*)(a_cols + 2*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
+        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (kk + 3);
+        shake128((unsigned char*)(a_cols + 3*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
 
         for (i = 0; i < PARAMS_NBAR; i++) {
             uint16_t sum[PARAMS_N] = {0};
@@ -226,6 +243,7 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
         }
     }
 #else  // Using vector intrinsics
+#error("FIXME NEED TO USE SHAKE NOT CSHAKE")
     for (kk = 0; kk < PARAMS_N; kk+=4) {
         cshake128_simple4x((unsigned char*)(a_cols), (unsigned char*)(a_cols + PARAMS_N), (unsigned char*)(a_cols + 2*PARAMS_N), (unsigned char*)(a_cols + 3*PARAMS_N), 
                            (unsigned long long)(2*PARAMS_N), (uint16_t)(256+kk), (uint16_t)(256+kk+1), (uint16_t)(256+kk+2), (uint16_t)(256+kk+3), seed_A, (unsigned long long)BYTES_SEED_A);

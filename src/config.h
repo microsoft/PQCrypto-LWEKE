@@ -82,8 +82,8 @@
 // Defining method for generating matrix A
 #if defined(_AES128_FOR_A_)
     #define USE_AES128_FOR_A
-#elif defined(_CSHAKE128_FOR_A_)
-    #define USE_CSHAKE128_FOR_A
+#elif defined(_SHAKE128_FOR_A_)
+    #define USE_SHAKE128_FOR_A
 #else
     ##error -- missing method for generating matrix A
 #endif

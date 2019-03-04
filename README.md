@@ -8,10 +8,10 @@ Concretely, this library includes the following KEM schemes using AES128 for the
 * FrodoKEM-640-AES: matching the post-quantum security of AES128.
 * FrodoKEM-976-AES: matching the post-quantum security of AES192.
 
-And the following KEM schemes using cSHAKE128 for the generation of the public matrix "A":
+And the following KEM schemes using SHAKE128 for the generation of the public matrix "A":
 
-* FrodoKEM-640-cSHAKE: matching the post-quantum security of AES128.
-* FrodoKEM-976-cSHAKE: matching the post-quantum security of AES192.
+* FrodoKEM-640-SHAKE: matching the post-quantum security of AES128.
+* FrodoKEM-976-SHAKE: matching the post-quantum security of AES192.
 
 The library was developed by [Microsoft Research](http://research.microsoft.com/) for experimentation purposes.
 
@@ -23,7 +23,7 @@ The library was developed by [Microsoft Research](http://research.microsoft.com/
 * [`Reference matrix operations`](frodo_macrify_reference.c): reference implementation of the matrix operations.
 * [`AES folder`](src/aes/): AES implementation.
 * [`random folder`](src/random/): randombytes function using the system random number generator.
-* [`sha3 folder`](src/sha3/): cSHAKE256 implementation.  
+* [`sha3 folder`](src/sha3/): SHA-3 / SHAKE128 / SHAKE256 implementation.  
 * [`Test folder`](tests/): test files.  
 * [`Visual Studio folder`](VisualStudio/): Visual Studio 2015 files for compilation in Windows.
 * [`Makefile`](Makefile): Makefile for compilation using the GNU GCC or clang compilers on Unix-like operative systems. 
@@ -36,8 +36,8 @@ The library was developed by [Microsoft Research](http://research.microsoft.com/
 Random values are generated with /dev/urandom on Unix-like operative systems, and CNG's BCryptGenRandom function in Windows. 
 Check the folder [`random`](src/random/) for details.
 
-The library includes standalone implementations of AES and cSHAKE. The generation of the matrix
-"A" (see the specification document [1]) can be carried out with either AES128 or cSHAKE128. By
+The library includes standalone implementations of AES and SHAKE. The generation of the matrix
+"A" (see the specification document [1]) can be carried out with either AES128 or SHAKE128. By
 default AES128 is used.
 
 There are two options for AES: the standalone implementation that is included in the software or
@@ -85,16 +85,16 @@ $ ./frodo640/PQCtestKAT_kem
 $ ./frodo976/PQCtestKAT_kem
 ```
 
-### Using cSHAKE128
+### Using SHAKE128
 
 By executing:
 
 ```sh
-$ make GENERATION_A=CSHAKE128
+$ make GENERATION_A=SHAKE128
 ```
 
 the library is compiled for x64 using gcc, and optimization level `FAST`, which uses AVX2 instrinsics. 
-cSHAKE128 is used to generate the matrix "A".
+SHAKE128 is used to generate the matrix "A".
 
 Testing and benchmarking results are obtained by running:
 
@@ -106,8 +106,8 @@ $ ./frodo976/test_KEM
 To run the implementations against the KATs, execute:
 
 ```sh
-$ ./frodo640/PQCtestKAT_kem_cshake
-$ ./frodo976/PQCtestKAT_kem_cshake
+$ ./frodo640/PQCtestKAT_kem_shake
+$ ./frodo976/PQCtestKAT_kem_shake
 ```
 
 ### Additional options
@@ -115,7 +115,7 @@ $ ./frodo976/PQCtestKAT_kem_cshake
 These are all the available options for compilation:
 
 ```sh
-$ make CC=[gcc/clang] ARCH=[x64/x86/ARM] OPT_LEVEL=[REFERENCE/FAST_GENERIC/FAST] GENERATION_A=[AES128/CSHAKE128] USE_OPENSSL=[TRUE/FALSE]
+$ make CC=[gcc/clang] ARCH=[x64/x86/ARM] OPT_LEVEL=[REFERENCE/FAST_GENERIC/FAST] GENERATION_A=[AES128/SHAKE128] USE_OPENSSL=[TRUE/FALSE]
 ```
 
 Note that the `FAST` option is only available for x64 with support for AVX2 and AES-NI instructions.
@@ -164,7 +164,7 @@ It includes some third party modules that are licensed differently. In particula
 - `src/sha3/keccak4x/brg_endian.h` which is copyrighted by Brian Gladman and comes with a BSD 3-clause license.
 - `tests/ds_benchmark.h`: public domain
 - `tests/PQCtestKAT_kem<#>.c`: copyrighted by Lawrence E. Bassham 
-- `tests/PQCtestKAT_kem<#>_cshake.c`: copyrighted by Lawrence E. Bassham
+- `tests/PQCtestKAT_kem<#>_shake.c`: copyrighted by Lawrence E. Bassham
 - `tests/rng.c`: copyrighted by Lawrence E. Bassham 
 
 ## Contributors
