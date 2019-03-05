@@ -19,6 +19,7 @@
 #define PARAMS_PARALLEL 4
 #define BYTES_SEED_A 16
 #define BYTES_MU (PARAMS_EXTRACTED_BITS*PARAMS_NBAR*PARAMS_NBAR)/8
+#define BYTES_PKHASH CRYPTO_BYTES
 
 // Selecting cSHAKE XOF function for the KEM and noise sampling
 #define cshake    cshake256_simple
