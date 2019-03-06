@@ -108,12 +108,12 @@ void frodo_unpack(uint16_t *out, const size_t outlen, const unsigned char *in, c
 }
 
 
-void clear_words(void* mem, unsigned int nwords)
-{ // Clear 32-bit words from memory. "nwords" indicates the number of words to be zeroed.
+void clear_bytes(uint8_t *mem, size_t n)
+{ // Clear 8-bit bytes from memory. "n" indicates the number of bytes to be zeroed.
   // This function uses the volatile type qualifier to inform the compiler not to optimize out the memory clearing.
-    volatile uint32_t *v = mem; 
+    volatile uint8_t *v = mem; 
 
-    for (unsigned int i = 0; i < nwords; i++) {
+    for (size_t i = 0; i < n; i++) {
         v[i] = 0;
     }
 }

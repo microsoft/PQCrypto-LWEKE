@@ -63,19 +63,17 @@ int frodo_mul_add_as_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
 #endif
 #elif defined (USE_SHAKE128_FOR_A)       
 #if defined(WINDOWS) | !defined(USE_AVX2)
-    uint8_t seed_A_separated[4 + BYTES_SEED_A];
-    seed_A_separated[0] = 0xFF;
-    seed_A_separated[1] = 0xFF;
-    memcpy(&seed_A_separated[4], seed_A, BYTES_SEED_A);
+    uint8_t seed_A_separated[2 + BYTES_SEED_A];
+    memcpy(&seed_A_separated[2], seed_A, BYTES_SEED_A);
     for (i = 0; i < PARAMS_N; i += 4) {
-        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (i + 0);
-        shake128((unsigned char*)(a_row + 0*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
-        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (i + 1);
-        shake128((unsigned char*)(a_row + 1*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
-        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (i + 2);
-        shake128((unsigned char*)(a_row + 2*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
-        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (i + 3);
-        shake128((unsigned char*)(a_row + 3*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
+        ((uint16_t *) seed_A_separated)[0] = (uint16_t) (i + 0);
+        shake128((unsigned char*)(a_row + 0*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
+        ((uint16_t *) seed_A_separated)[0] = (uint16_t) (i + 1);
+        shake128((unsigned char*)(a_row + 1*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
+        ((uint16_t *) seed_A_separated)[0] = (uint16_t) (i + 2);
+        shake128((unsigned char*)(a_row + 2*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
+        ((uint16_t *) seed_A_separated)[0] = (uint16_t) (i + 3);
+        shake128((unsigned char*)(a_row + 3*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
 #else
 #error("FIXME NEED TO USE SHAKE NOT CSHAKE")
     for (i = 0; i < PARAMS_N; i += 4) {
@@ -215,19 +213,17 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
 
 #if defined(WINDOWS) | !defined(USE_AVX2)
     int k;
-    uint8_t seed_A_separated[4 + BYTES_SEED_A];
-    seed_A_separated[0] = 0xFF;
-    seed_A_separated[1] = 0xFF;
-    memcpy(&seed_A_separated[4], seed_A, BYTES_SEED_A);
+    uint8_t seed_A_separated[2 + BYTES_SEED_A];
+    memcpy(&seed_A_separated[2], seed_A, BYTES_SEED_A);
     for (kk = 0; kk < PARAMS_N; kk+=4) {
-        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (kk + 0);
-        shake128((unsigned char*)(a_cols + 0*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
-        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (kk + 1);
-        shake128((unsigned char*)(a_cols + 1*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
-        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (kk + 2);
-        shake128((unsigned char*)(a_cols + 2*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
-        ((uint16_t *) &seed_A_separated[2])[0] = (uint16_t) (kk + 3);
-        shake128((unsigned char*)(a_cols + 3*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 4 + BYTES_SEED_A);
+        ((uint16_t *) seed_A_separated)[0] = (uint16_t) (kk + 0);
+        shake128((unsigned char*)(a_cols + 0*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
+        ((uint16_t *) seed_A_separated)[0] = (uint16_t) (kk + 1);
+        shake128((unsigned char*)(a_cols + 1*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
+        ((uint16_t *) seed_A_separated)[0] = (uint16_t) (kk + 2);
+        shake128((unsigned char*)(a_cols + 2*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
+        ((uint16_t *) seed_A_separated)[0] = (uint16_t) (kk + 3);
+        shake128((unsigned char*)(a_cols + 3*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
 
         for (i = 0; i < PARAMS_NBAR; i++) {
             uint16_t sum[PARAMS_N] = {0};
