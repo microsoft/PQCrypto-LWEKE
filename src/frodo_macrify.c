@@ -75,10 +75,21 @@ int frodo_mul_add_as_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
         ((uint16_t *) seed_A_separated)[0] = (uint16_t) (i + 3);
         shake128((unsigned char*)(a_row + 3*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
 #else
-#error("FIXME NEED TO USE SHAKE NOT CSHAKE")
+    uint8_t seed_A_separated_0[2 + BYTES_SEED_A];
+    uint8_t seed_A_separated_1[2 + BYTES_SEED_A];
+    uint8_t seed_A_separated_2[2 + BYTES_SEED_A];
+    uint8_t seed_A_separated_3[2 + BYTES_SEED_A];
+    memcpy(&seed_A_separated_0[2], seed_A, BYTES_SEED_A);
+    memcpy(&seed_A_separated_1[2], seed_A, BYTES_SEED_A);
+    memcpy(&seed_A_separated_2[2], seed_A, BYTES_SEED_A);
+    memcpy(&seed_A_separated_3[2], seed_A, BYTES_SEED_A);
     for (i = 0; i < PARAMS_N; i += 4) {
-        cshake128_simple4x((unsigned char*)(a_row), (unsigned char*)(a_row + PARAMS_N), (unsigned char*)(a_row + 2*PARAMS_N), (unsigned char*)(a_row + 3*PARAMS_N), 
-                           (unsigned long long)(2*PARAMS_N), (uint16_t)(256+i), (uint16_t)(256+i+1), (uint16_t)(256+i+2), (uint16_t)(256+i+3), seed_A, (unsigned long long)BYTES_SEED_A);
+        ((uint16_t *) seed_A_separated_0)[0] = (uint16_t) (i + 0);
+        ((uint16_t *) seed_A_separated_1)[0] = (uint16_t) (i + 1);
+        ((uint16_t *) seed_A_separated_2)[0] = (uint16_t) (i + 2);
+        ((uint16_t *) seed_A_separated_3)[0] = (uint16_t) (i + 3);
+        shake128_4x((unsigned char*)(a_row), (unsigned char*)(a_row + PARAMS_N), (unsigned char*)(a_row + 2*PARAMS_N), (unsigned char*)(a_row + 3*PARAMS_N), 
+                    (unsigned long long)(2*PARAMS_N), seed_A_separated_0, seed_A_separated_1, seed_A_separated_2, seed_A_separated_3, 2 + BYTES_SEED_A);
 #endif
 #endif
 
@@ -239,10 +250,21 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
         }
     }
 #else  // Using vector intrinsics
-#error("FIXME NEED TO USE SHAKE NOT CSHAKE")
+    uint8_t seed_A_separated_0[2 + BYTES_SEED_A];
+    uint8_t seed_A_separated_1[2 + BYTES_SEED_A];
+    uint8_t seed_A_separated_2[2 + BYTES_SEED_A];
+    uint8_t seed_A_separated_3[2 + BYTES_SEED_A];
+    memcpy(&seed_A_separated_0[2], seed_A, BYTES_SEED_A);
+    memcpy(&seed_A_separated_1[2], seed_A, BYTES_SEED_A);
+    memcpy(&seed_A_separated_2[2], seed_A, BYTES_SEED_A);
+    memcpy(&seed_A_separated_3[2], seed_A, BYTES_SEED_A);
     for (kk = 0; kk < PARAMS_N; kk+=4) {
-        cshake128_simple4x((unsigned char*)(a_cols), (unsigned char*)(a_cols + PARAMS_N), (unsigned char*)(a_cols + 2*PARAMS_N), (unsigned char*)(a_cols + 3*PARAMS_N), 
-                           (unsigned long long)(2*PARAMS_N), (uint16_t)(256+kk), (uint16_t)(256+kk+1), (uint16_t)(256+kk+2), (uint16_t)(256+kk+3), seed_A, (unsigned long long)BYTES_SEED_A);
+        ((uint16_t *) seed_A_separated_0)[0] = (uint16_t) (kk + 0);
+        ((uint16_t *) seed_A_separated_1)[0] = (uint16_t) (kk + 1);
+        ((uint16_t *) seed_A_separated_2)[0] = (uint16_t) (kk + 2);
+        ((uint16_t *) seed_A_separated_3)[0] = (uint16_t) (kk + 3);
+        shake128_4x((unsigned char*)(a_cols), (unsigned char*)(a_cols + PARAMS_N), (unsigned char*)(a_cols + 2*PARAMS_N), (unsigned char*)(a_cols + 3*PARAMS_N), 
+                    (unsigned long long)(2*PARAMS_N), seed_A_separated_0, seed_A_separated_1, seed_A_separated_2, seed_A_separated_3, 2 + BYTES_SEED_A);
 
         for (i = 0; i < PARAMS_NBAR; i++) {
             __m256i a, b0, b1, b2, b3, acc[PARAMS_N/16];
