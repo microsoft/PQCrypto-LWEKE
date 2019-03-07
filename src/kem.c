@@ -84,7 +84,7 @@ int crypto_kem_enc(unsigned char *ct, unsigned char *ss, const unsigned char *pk
     uint8_t *Fin_k = &Fin[CRYPTO_CIPHERTEXTBYTES];            // contains secret data
     uint8_t shake_input_seedSE[1 + CRYPTO_BYTES];             // contains secret data
 
-    // hpk <- G_1(pk), generate random mu, compute (seedSE || k) = G_2(pkh || mu)
+    // pkh <- G_1(pk), generate random mu, compute (seedSE || k) = G_2(pkh || mu)
     shake(pkh, BYTES_PKHASH, pk, CRYPTO_PUBLICKEYBYTES);
     randombytes(mu, BYTES_MU);
     shake(G2out, CRYPTO_BYTES + CRYPTO_BYTES, G2in, BYTES_PKHASH + BYTES_MU);
@@ -121,6 +121,7 @@ int crypto_kem_enc(unsigned char *ct, unsigned char *ss, const unsigned char *pk
     clear_bytes(mu, BYTES_MU);
     clear_bytes(G2out, 2*CRYPTO_BYTES);
     clear_bytes(Fin_k, CRYPTO_BYTES);
+    clear_bytes(shake_input_seedSE, 1 + CRYPTO_BYTES);
     return 0;
 }
 
@@ -153,7 +154,7 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
     uint8_t Fin[CRYPTO_CIPHERTEXTBYTES + CRYPTO_BYTES];      // contains secret data via Fin_k
     uint8_t *Fin_ct = &Fin[0];
     uint8_t *Fin_k = &Fin[CRYPTO_CIPHERTEXTBYTES];           // contains secret data
-    uint8_t shake_input_seedSEprime[1 + CRYPTO_BYTES];
+    uint8_t shake_input_seedSEprime[1 + CRYPTO_BYTES];       // contains secret data
 
     // Compute W = C - Bp*S (mod q), and decode the randomness mu
     frodo_unpack(Bp, PARAMS_N*PARAMS_NBAR, ct_c1, (PARAMS_LOGQ*PARAMS_N*PARAMS_NBAR)/8, PARAMS_LOGQ);
@@ -207,5 +208,6 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
     clear_bytes(muprime, BYTES_MU);
     clear_bytes(G2out, 2*CRYPTO_BYTES);
     clear_bytes(Fin_k, CRYPTO_BYTES);
+    clear_bytes(shake_input_seedSEprime, 1 + CRYPTO_BYTES);
     return 0;
 }
