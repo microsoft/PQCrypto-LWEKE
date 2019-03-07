@@ -22,17 +22,20 @@ int crypto_kem_keypair(unsigned char* pk, unsigned char* sk)
     uint16_t B[PARAMS_N*PARAMS_NBAR] = {0};
     uint16_t S[2*PARAMS_N*PARAMS_NBAR] = {0};               // contains secret data
     uint16_t *E = (uint16_t *)&S[PARAMS_N*PARAMS_NBAR];     // contains secret data
-    uint8_t randomness[2*CRYPTO_BYTES + BYTES_SEED_A];      // contains secret data via randomness_s and randomness_seedE
+    uint8_t randomness[2*CRYPTO_BYTES + BYTES_SEED_A];      // contains secret data via randomness_s and randomness_seedSE
     uint8_t *randomness_s = &randomness[0];                 // contains secret data
-    uint8_t *randomness_seedE = &randomness[CRYPTO_BYTES];  // contains secret data
+    uint8_t *randomness_seedSE = &randomness[CRYPTO_BYTES]; // contains secret data
     uint8_t *randomness_z = &randomness[2*CRYPTO_BYTES];
+    uint8_t shake_input_seedSE[1 + CRYPTO_BYTES];           // contains secret data
 
     // Generate the secret value s, the seed for S and E, and the seed for the seed for A. Add seed_A to the public key
-    randombytes(randomness, 2*CRYPTO_BYTES + BYTES_SEED_A);
-    cshake(pk_seedA, BYTES_SEED_A, 0, randomness_z, (unsigned long long)(BYTES_SEED_A));
+    randombytes(randomness, CRYPTO_BYTES + CRYPTO_BYTES + BYTES_SEED_A);
+    shake(pk_seedA, BYTES_SEED_A, randomness_z, BYTES_SEED_A);
 
     // Generate S and E, and compute B = A*S + E. Generate A on-the-fly
-    cshake((uint8_t*)S, 2*PARAMS_N*PARAMS_NBAR*sizeof(uint16_t), 1, randomness_seedE, (unsigned long long)(CRYPTO_BYTES));
+    shake_input_seedSE[0] = 0x5F;
+    memcpy(&shake_input_seedSE[1], randomness_seedSE, CRYPTO_BYTES);
+    shake((uint8_t*)S, 2*PARAMS_N*PARAMS_NBAR*sizeof(uint16_t), shake_input_seedSE, 1 + CRYPTO_BYTES);
     frodo_sample_n(S, PARAMS_N*PARAMS_NBAR);
     frodo_sample_n(E, PARAMS_N*PARAMS_NBAR);
     frodo_mul_add_as_plus_e(B, S, E, pk);
@@ -45,13 +48,14 @@ int crypto_kem_keypair(unsigned char* pk, unsigned char* sk)
     memcpy(sk_pk, pk, CRYPTO_PUBLICKEYBYTES);
     memcpy(sk_S, S, 2*PARAMS_N*PARAMS_NBAR);
 
-    // Add G_1(pk) to the secret key
-    cshake(sk_pkh, BYTES_PKHASH, 1, pk, CRYPTO_PUBLICKEYBYTES);
+    // Add H(pk) to the secret key
+    shake(sk_pkh, BYTES_PKHASH, pk, CRYPTO_PUBLICKEYBYTES);
 
     // Cleanup:
-    clear_words((void*)S, PARAMS_N*PARAMS_NBAR/2);
-    clear_words((void*)E, PARAMS_N*PARAMS_NBAR/2);
-    clear_words((void*)randomness, CRYPTO_BYTES/2);
+    clear_bytes((uint8_t *)S, PARAMS_N*PARAMS_NBAR*sizeof(uint16_t));
+    clear_bytes((uint8_t *)E, PARAMS_N*PARAMS_NBAR*sizeof(uint16_t));
+    clear_bytes(randomness, 2*CRYPTO_BYTES);
+    clear_bytes(shake_input_seedSE, 1 + CRYPTO_BYTES);
     return 0;
 }
 
@@ -73,19 +77,22 @@ int crypto_kem_enc(unsigned char *ct, unsigned char *ss, const unsigned char *pk
     uint8_t *pkh = &G2in[0];
     uint8_t *mu = &G2in[BYTES_PKHASH];                        // contains secret data
     uint8_t G2out[2*CRYPTO_BYTES];                            // contains secret data
-    uint8_t *seedE = &G2out[0];                               // contains secret data
+    uint8_t *seedSE = &G2out[0];                              // contains secret data
     uint8_t *k = &G2out[CRYPTO_BYTES];                        // contains secret data
     uint8_t Fin[CRYPTO_CIPHERTEXTBYTES + CRYPTO_BYTES];       // contains secret data via Fin_k
     uint8_t *Fin_ct = &Fin[0];
     uint8_t *Fin_k = &Fin[CRYPTO_CIPHERTEXTBYTES];            // contains secret data
+    uint8_t shake_input_seedSE[1 + CRYPTO_BYTES];             // contains secret data
 
-    // pkh <- G_1(pk), generate random mu, compute (seedE || k) = G_2(pkh || mu)
-    cshake(pkh, BYTES_PKHASH, 1, pk, CRYPTO_PUBLICKEYBYTES);
+    // pkh <- G_1(pk), generate random mu, compute (seedSE || k) = G_2(pkh || mu)
+    shake(pkh, BYTES_PKHASH, pk, CRYPTO_PUBLICKEYBYTES);
     randombytes(mu, BYTES_MU);
-    cshake(G2out, 2*CRYPTO_BYTES, 2, G2in, (unsigned long long)(BYTES_PKHASH + BYTES_MU));
+    shake(G2out, CRYPTO_BYTES + CRYPTO_BYTES, G2in, BYTES_PKHASH + BYTES_MU);
 
     // Generate Sp and Ep, and compute Bp = Sp*A + Ep. Generate A on-the-fly
-    cshake((uint8_t*)Sp, (2*PARAMS_N+PARAMS_NBAR)*PARAMS_NBAR*sizeof(uint16_t), 3, seedE, (unsigned long long)(CRYPTO_BYTES));
+    shake_input_seedSE[0] = 0x96;
+    memcpy(&shake_input_seedSE[1], seedSE, CRYPTO_BYTES);
+    shake((uint8_t*)Sp, (2*PARAMS_N+PARAMS_NBAR)*PARAMS_NBAR*sizeof(uint16_t), shake_input_seedSE, 1 + CRYPTO_BYTES);
     frodo_sample_n(Sp, PARAMS_N*PARAMS_NBAR);
     frodo_sample_n(Ep, PARAMS_N*PARAMS_NBAR);
     frodo_mul_add_sa_plus_e(Bp, Sp, Ep, pk_seedA);
@@ -104,16 +111,17 @@ int crypto_kem_enc(unsigned char *ct, unsigned char *ss, const unsigned char *pk
     // Compute ss = F(ct||KK)
     memcpy(Fin_ct, ct, CRYPTO_CIPHERTEXTBYTES);
     memcpy(Fin_k, k, CRYPTO_BYTES);
-    cshake(ss, CRYPTO_BYTES, 4, Fin, (unsigned long long)(CRYPTO_CIPHERTEXTBYTES + CRYPTO_BYTES));
+    shake(ss, CRYPTO_BYTES, Fin, CRYPTO_CIPHERTEXTBYTES + CRYPTO_BYTES);
 
     // Cleanup:
-    clear_words((void*)V, PARAMS_NBAR*PARAMS_NBAR/2);
-    clear_words((void*)Sp, PARAMS_N*PARAMS_NBAR/2);
-    clear_words((void*)Ep, PARAMS_N*PARAMS_NBAR/2);
-    clear_words((void*)Epp, PARAMS_NBAR*PARAMS_NBAR/2);
-    clear_words((void*)mu, BYTES_MU/4);
-    clear_words((void*)G2out, CRYPTO_BYTES/2);
-    clear_words((void*)Fin_k, CRYPTO_BYTES/4);
+    clear_bytes((uint8_t *)V, PARAMS_NBAR*PARAMS_NBAR*sizeof(uint16_t));
+    clear_bytes((uint8_t *)Sp, PARAMS_N*PARAMS_NBAR*sizeof(uint16_t));
+    clear_bytes((uint8_t *)Ep, PARAMS_N*PARAMS_NBAR*sizeof(uint16_t));
+    clear_bytes((uint8_t *)Epp, PARAMS_NBAR*PARAMS_NBAR*sizeof(uint16_t));
+    clear_bytes(mu, BYTES_MU);
+    clear_bytes(G2out, 2*CRYPTO_BYTES);
+    clear_bytes(Fin_k, CRYPTO_BYTES);
+    clear_bytes(shake_input_seedSE, 1 + CRYPTO_BYTES);
     return 0;
 }
 
@@ -141,11 +149,12 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
     uint8_t *pkh = &G2in[0];
     uint8_t *muprime = &G2in[BYTES_PKHASH];                  // contains secret data
     uint8_t G2out[2*CRYPTO_BYTES];                           // contains secret data
-    uint8_t *seedEprime = &G2out[0];                         // contains secret data
+    uint8_t *seedSEprime = &G2out[0];                        // contains secret data
     uint8_t *kprime = &G2out[CRYPTO_BYTES];                  // contains secret data
-    uint8_t Fin[CRYPTO_CIPHERTEXTBYTES + CRYPTO_BYTES];      // contains secret data via Finput_k
+    uint8_t Fin[CRYPTO_CIPHERTEXTBYTES + CRYPTO_BYTES];      // contains secret data via Fin_k
     uint8_t *Fin_ct = &Fin[0];
     uint8_t *Fin_k = &Fin[CRYPTO_CIPHERTEXTBYTES];           // contains secret data
+    uint8_t shake_input_seedSEprime[1 + CRYPTO_BYTES];       // contains secret data
 
     // Compute W = C - Bp*S (mod q), and decode the randomness mu
     frodo_unpack(Bp, PARAMS_N*PARAMS_NBAR, ct_c1, (PARAMS_LOGQ*PARAMS_N*PARAMS_NBAR)/8, PARAMS_LOGQ);
@@ -154,12 +163,14 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
     frodo_sub(W, C, W);
     frodo_key_decode((uint16_t*)muprime, W);
 
-    // Generate (seedE' || k') = G_2(pkh || mu')
+    // Generate (seedSE' || k') = G_2(pkh || mu')
     memcpy(pkh, sk_pkh, BYTES_PKHASH);
-    cshake(G2out, 2*CRYPTO_BYTES, 2, G2in, (unsigned long long)(BYTES_PKHASH + BYTES_MU));
+    shake(G2out, CRYPTO_BYTES + CRYPTO_BYTES, G2in, BYTES_PKHASH + BYTES_MU);
 
     // Generate Sp and Ep, and compute BBp = Sp*A + Ep. Generate A on-the-fly
-    cshake((uint8_t*)Sp, (2*PARAMS_N+PARAMS_NBAR)*PARAMS_NBAR*sizeof(uint16_t), 3, seedEprime, (unsigned long long)(CRYPTO_BYTES));
+    shake_input_seedSEprime[0] = 0x96;
+    memcpy(&shake_input_seedSEprime[1], seedSEprime, CRYPTO_BYTES);
+    shake((uint8_t*)Sp, (2*PARAMS_N+PARAMS_NBAR)*PARAMS_NBAR*sizeof(uint16_t), shake_input_seedSEprime, 1 + CRYPTO_BYTES);
     frodo_sample_n(Sp, PARAMS_N*PARAMS_NBAR);
     frodo_sample_n(Ep, PARAMS_N*PARAMS_NBAR);
     frodo_mul_add_sa_plus_e(BBp, Sp, Ep, pk_seedA);
@@ -187,15 +198,16 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
         // Load s to do ss = F(ct || s)
         memcpy(Fin_k, sk_s, CRYPTO_BYTES);
     }
-    cshake(ss, CRYPTO_BYTES, 4, Fin, (unsigned long long)(CRYPTO_CIPHERTEXTBYTES + CRYPTO_BYTES));
+    shake(ss, CRYPTO_BYTES, Fin, CRYPTO_CIPHERTEXTBYTES + CRYPTO_BYTES);
 
     // Cleanup:
-    clear_words((void*)W, PARAMS_NBAR*PARAMS_NBAR/2);
-    clear_words((void*)Sp, PARAMS_N*PARAMS_NBAR/2);
-    clear_words((void*)Ep, PARAMS_N*PARAMS_NBAR/2);
-    clear_words((void*)Epp, PARAMS_NBAR*PARAMS_NBAR/2);
-    clear_words((void*)muprime, BYTES_MU/4);
-    clear_words((void*)G2out, CRYPTO_BYTES/2);
-    clear_words((void*)Fin_k, CRYPTO_BYTES/4);
+    clear_bytes((uint8_t *)W, PARAMS_NBAR*PARAMS_NBAR*sizeof(uint16_t));
+    clear_bytes((uint8_t *)Sp, PARAMS_N*PARAMS_NBAR*sizeof(uint16_t));
+    clear_bytes((uint8_t *)Ep, PARAMS_N*PARAMS_NBAR*sizeof(uint16_t));
+    clear_bytes((uint8_t *)Epp, PARAMS_NBAR*PARAMS_NBAR*sizeof(uint16_t));
+    clear_bytes(muprime, BYTES_MU);
+    clear_bytes(G2out, 2*CRYPTO_BYTES);
+    clear_bytes(Fin_k, CRYPTO_BYTES);
+    clear_bytes(shake_input_seedSEprime, 1 + CRYPTO_BYTES);
     return 0;
 }
