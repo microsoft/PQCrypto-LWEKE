@@ -33,7 +33,7 @@ else ifeq "$(OPT_LEVEL)" "FAST"
 endif
 
 USE_GENERATION_A=_AES128_FOR_A_
-ifeq "$(GENERATION_A)" "AES128_ECB"
+ifeq "$(GENERATION_A)" "AES128"
     USE_GENERATION_A=_AES128_FOR_A_
 else ifeq "$(GENERATION_A)" "SHAKE128"
     USE_GENERATION_A=_SHAKE128_FOR_A_
@@ -55,7 +55,10 @@ AR=ar rcs
 RANLIB=ranlib
 LN=ln -s
 
-CFLAGS= -O3 -std=gnu11 -Wall -Wextra -march=native -DNIX -D $(ARCHITECTURE) -D $(USE_OPT_LEVEL) -D $(USE_GENERATION_A) -D $(USING_OPENSSL)
+CFLAGS= -O3 -std=gnu11 -Wall -Wextra -DNIX -D $(ARCHITECTURE) -D $(USE_OPT_LEVEL) -D $(USE_GENERATION_A) -D $(USING_OPENSSL)
+ifeq "$(CC)" "gcc"
+CFLAGS+= -march=native
+endif
 ifeq "$(USE_OPENSSL)" "FALSE"
 LDFLAGS=-lm
 else
