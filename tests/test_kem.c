@@ -26,7 +26,7 @@ static int kem_test(const char *named_parameters, int iterations)
         crypto_kem_dec(ss_decap, ct, sk);
         if (memcmp(ss_encap, ss_decap, CRYPTO_BYTES) != 0) {
             printf("\n ERROR!\n");
-	    return false; 
+	        return false; 
         }
     }
     printf("Tests PASSED. All session keys matched.\n");

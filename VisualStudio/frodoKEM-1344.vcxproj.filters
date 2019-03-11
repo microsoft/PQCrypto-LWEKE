@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\src\aes\aes.c">
+      <Filter>Source Files\AES</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\aes\aes_c.c">
+      <Filter>Source Files\AES</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\aes\aes_ni.c">
+      <Filter>Source Files\AES</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\sha3\fips202.c">
+      <Filter>Source Files\sha3</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\random\random.c">
+      <Filter>Source Files\random</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\frodo_macrify.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\frodo_macrify_reference.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\kem.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\noise.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\util.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\frodo1344.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\aes\aes.h">
+      <Filter>Source Files\AES</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\frodo_macrify.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\sha3\fips202.h">
+      <Filter>Source Files\sha3</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\random\random.h">
+      <Filter>Source Files\random</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\aes\aes_local.h">
+      <Filter>Source Files\AES</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\api_frodo1344.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{47469e83-ec7a-4d69-baf0-ab15e961629e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{7041c366-2ed8-4a00-8e92-4f6e2471eb9d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\AES">
+      <UniqueIdentifier>{71c917ec-9181-4b88-bdfc-9611ee1abe9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\random">
+      <UniqueIdentifier>{fd44eb34-2f81-411e-a55f-f279c4b101de}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\sha3">
+      <UniqueIdentifier>{656e58e0-96ef-4f93-9711-0ebe15c55da2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -5,20 +5,22 @@ This C library implements **FrodoKEM**, an IND-CCA secure key encapsulation (KEM
 
 Concretely, this library includes the following KEM schemes using AES128 for the generation of the public matrix "A":
 
-* FrodoKEM-640-AES: matching the post-quantum security of AES128.
-* FrodoKEM-976-AES: matching the post-quantum security of AES192.
+* FrodoKEM-640-AES:  matching the post-quantum security of AES128.
+* FrodoKEM-976-AES:  matching the post-quantum security of AES192.
+* FrodoKEM-1344-AES: matching the post-quantum security of AES256.
 
 And the following KEM schemes using SHAKE128 for the generation of the public matrix "A":
 
-* FrodoKEM-640-SHAKE: matching the post-quantum security of AES128.
-* FrodoKEM-976-SHAKE: matching the post-quantum security of AES192.
+* FrodoKEM-640-SHAKE:  matching the post-quantum security of AES128.
+* FrodoKEM-976-SHAKE:  matching the post-quantum security of AES192.
+* FrodoKEM-1344-SHAKE: matching the post-quantum security of AES256.
 
 The library was developed by [Microsoft Research](http://research.microsoft.com/) for experimentation purposes.
 
 ## Contents
 
 * [`KAT folder`](KAT/): Known Answer Test (KAT) files for the KEM.
-* [`src folder`](src/): C and header files. Public APIs can be found in [`api_frodo640.h`](src/api_frodo640.h) and [`api_frodo976.h`](src/api_frodo976.h).
+* [`src folder`](src/): C and header files. Public APIs can be found in [`api_frodo640.h`](src/api_frodo640.h), [`api_frodo976.h`](src/api_frodo976.h) and [`api_frodo1344.h`](src/api_frodo1344.h).
 * [`Optimized matrix operations`](src/frodo_macrify.c): optimized implementation of the matrix operations. 
 * [`Reference matrix operations`](frodo_macrify_reference.c): reference implementation of the matrix operations.
 * [`AES folder`](src/aes/): AES implementation.
@@ -46,7 +48,7 @@ OpenSSL's AES implementation. OpenSSL's AES implementation is used by default.
 ## Supported Platforms
 
 The FrodoKEM library is supported on a wide range of platforms including x64, x86 and ARM devices running Windows, Linux or macOS. 
-We have tested the library with Microsoft Visual Studio 2015, GNU GCC v5.4, and clang v3.8.
+We have tested the library with Microsoft Visual Studio 2015, GNU GCC v7.2, and clang v3.8.
 See instructions below to choose an implementation option and compile on one of the supported platforms.
 
 ## Implementation Options
@@ -76,6 +78,7 @@ Testing and benchmarking results are obtained by running:
 ```sh
 $ ./frodo640/test_KEM
 $ ./frodo976/test_KEM
+$ ./frodo1344/test_KEM
 ```
 
 To run the implementations against the KATs, execute:
@@ -83,6 +86,7 @@ To run the implementations against the KATs, execute:
 ```sh
 $ ./frodo640/PQCtestKAT_kem
 $ ./frodo976/PQCtestKAT_kem
+$ ./frodo1344/PQCtestKAT_kem
 ```
 
 ### Using SHAKE128
@@ -101,6 +105,7 @@ Testing and benchmarking results are obtained by running:
 ```sh
 $ ./frodo640/test_KEM
 $ ./frodo976/test_KEM
+$ ./frodo1344/test_KEM
 ```
 
 To run the implementations against the KATs, execute:
@@ -108,6 +113,7 @@ To run the implementations against the KATs, execute:
 ```sh
 $ ./frodo640/PQCtestKAT_kem_shake
 $ ./frodo976/PQCtestKAT_kem_shake
+$ ./frodo1344/PQCtestKAT_kem_shake
 ```
 
 ### Additional options
@@ -143,12 +149,12 @@ Make sure `Fast_generic` is selected in the configuration menu. Finally, select 
 
 ### Running the tests:
 
-After building the solution file, there should be two executable files: `test_KEM640.exe` and `test_KEM976.exe`, to run tests for the KEM. 
+After building the solution file, there should be three executable files: `test_KEM640.exe`, `test_KEM976.exe` and `test_KEM1344.exe`, to run tests for the KEM. 
 
 ### Using the library:
 
-After building the solution file, add the generated `FrodoKEM-640.lib` and `FrodoKEM-976.lib` library files to the set of References for a project, 
-and add [`api_frodo640.h`](src/api_frodo640.h) and [`api_frodo976.h`](src/api_frodo976.h) to the list of header files of a project.
+After building the solution file, add the generated `FrodoKEM-640.lib`, `FrodoKEM-976.lib` and `FrodoKEM-1344.lib` library files to the set of References for a project, 
+and add [`api_frodo640.h`](src/api_frodo640.h), [`api_frodo976.h`](src/api_frodo976.h) and [`api_frodo1344.h`](src/api_frodo1344.h) to the list of header files of a project.
 
 
 ## License

@@ -25,8 +25,8 @@
 #define shake     shake128
 
 // CDF table
-uint16_t CDF_TABLE[12] = {4727, 13584, 20864, 26113, 29434, 31278, 32176, 32560, 32704, 32751, 32764, 32767};
-uint16_t CDF_TABLE_LEN = 12;
+uint16_t CDF_TABLE[13] = {4643, 13363, 20579, 25843, 29227, 31145, 32103, 32525, 32689, 32745, 32762, 32766, 32767};
+uint16_t CDF_TABLE_LEN = 13;
 
 #define crypto_kem_keypair            crypto_kem_keypair_Frodo640
 #define crypto_kem_enc                crypto_kem_enc_Frodo640
