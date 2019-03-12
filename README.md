@@ -179,8 +179,8 @@ The library was developed by Microsoft Research using as basis the Frodo impleme
 which in turn is based on [2].
 
 Other contributors include:
-
 - Erdem Alkim, while he was an intern with Microsoft Research.
+- Douglas Stebila.
 
 # References
 
