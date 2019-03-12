@@ -40,9 +40,10 @@ int frodo_mul_add_as_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
 #endif
 #elif defined(USE_SHAKE128_FOR_A)  // Matrix A generation using SHAKE128, done per 16*N-bit row   
     uint8_t seed_A_separated[2 + BYTES_SEED_A];
+    uint16_t* seed_A_origin = (uint16_t*)&seed_A_separated;
     memcpy(&seed_A_separated[2], seed_A, BYTES_SEED_A);
     for (i = 0; i < PARAMS_N; i++) {
-        ((uint16_t *) seed_A_separated)[0] = (uint16_t) i;
+        seed_A_origin[0] = (uint16_t) i;
         shake128((unsigned char*)(A + i*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
     }
 #endif    
@@ -94,9 +95,10 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
 #endif
 #elif defined (USE_SHAKE128_FOR_A)  // Matrix A generation using SHAKE128, done per 16*N-bit row
     uint8_t seed_A_separated[2 + BYTES_SEED_A];
+    uint16_t* seed_A_origin = (uint16_t*)&seed_A_separated;
     memcpy(&seed_A_separated[2], seed_A, BYTES_SEED_A);
     for (i = 0; i < PARAMS_N; i++) {
-        ((uint16_t *) seed_A_separated)[0] = (uint16_t) i;
+        seed_A_origin[0] = (uint16_t) i;
         shake128((unsigned char*)(A + i*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
     }
 #endif
