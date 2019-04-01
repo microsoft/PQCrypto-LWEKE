@@ -43,7 +43,7 @@ int frodo_mul_add_as_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
     uint16_t* seed_A_origin = (uint16_t*)&seed_A_separated;
     memcpy(&seed_A_separated[2], seed_A, BYTES_SEED_A);
     for (i = 0; i < PARAMS_N; i++) {
-        seed_A_origin[0] = UINT16_TO_LE(i);
+        seed_A_origin[0] = UINT16_TO_LE((uint16_t) i);
         shake128((unsigned char*)(A + i*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
     }
     for (i = 0; i < PARAMS_N * PARAMS_N; i++) {
@@ -101,7 +101,7 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
     uint16_t* seed_A_origin = (uint16_t*)&seed_A_separated;
     memcpy(&seed_A_separated[2], seed_A, BYTES_SEED_A);
     for (i = 0; i < PARAMS_N; i++) {
-        seed_A_origin[0] = UINT16_TO_LE(i);
+        seed_A_origin[0] = UINT16_TO_LE((uint16_t) i);
         shake128((unsigned char*)(A + i*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
     }
     for (i = 0; i < PARAMS_N * PARAMS_N; i++) {
