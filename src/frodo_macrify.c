@@ -67,14 +67,17 @@ int frodo_mul_add_as_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
     uint16_t* seed_A_origin = (uint16_t*)&seed_A_separated;
     memcpy(&seed_A_separated[2], seed_A, BYTES_SEED_A);
     for (i = 0; i < PARAMS_N; i += 4) {
-        seed_A_origin[0] = (uint16_t) (i + 0);
+        seed_A_origin[0] = UINT16_TO_LE(i + 0);
         shake128((unsigned char*)(a_row + 0*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
-        seed_A_origin[0] = (uint16_t) (i + 1);
+        seed_A_origin[0] = UINT16_TO_LE(i + 1);
         shake128((unsigned char*)(a_row + 1*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
-        seed_A_origin[0] = (uint16_t) (i + 2);
+        seed_A_origin[0] = UINT16_TO_LE(i + 2);
         shake128((unsigned char*)(a_row + 2*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
-        seed_A_origin[0] = (uint16_t) (i + 3);
+        seed_A_origin[0] = UINT16_TO_LE(i + 3);
         shake128((unsigned char*)(a_row + 3*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
+        for (k = 0; k < 4 * PARAMS_N; k++) {
+            a_row[k] = LE_TO_UINT16(a_row[k]);
+        }
 #else
     uint8_t seed_A_separated_0[2 + BYTES_SEED_A];
     uint8_t seed_A_separated_1[2 + BYTES_SEED_A];
@@ -89,15 +92,15 @@ int frodo_mul_add_as_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
     memcpy(&seed_A_separated_2[2], seed_A, BYTES_SEED_A);
     memcpy(&seed_A_separated_3[2], seed_A, BYTES_SEED_A);
     for (i = 0; i < PARAMS_N; i += 4) {
-        seed_A_origin_0[0] = (uint16_t) (i + 0);
-        seed_A_origin_1[0] = (uint16_t) (i + 1);
-        seed_A_origin_2[0] = (uint16_t) (i + 2);
-        seed_A_origin_3[0] = (uint16_t) (i + 3);
+        seed_A_origin_0[0] = UINT16_TO_LE(i + 0);
+        seed_A_origin_1[0] = UINT16_TO_LE(i + 1);
+        seed_A_origin_2[0] = UINT16_TO_LE(i + 2);
+        seed_A_origin_3[0] = UINT16_TO_LE(i + 3);
         shake128_4x((unsigned char*)(a_row), (unsigned char*)(a_row + PARAMS_N), (unsigned char*)(a_row + 2*PARAMS_N), (unsigned char*)(a_row + 3*PARAMS_N), 
                     (unsigned long long)(2*PARAMS_N), seed_A_separated_0, seed_A_separated_1, seed_A_separated_2, seed_A_separated_3, 2 + BYTES_SEED_A);
+        // no need for LE_TO_UINT16(a_row[...]) since AVX2 is always on a little-endian platform
 #endif
 #endif
-
         for (k = 0; k < PARAMS_NBAR; k++) {
             uint16_t sum[4] = {0};
             for (j = 0; j < PARAMS_N; j++) {                    // Matrix-vector multiplication            
@@ -233,14 +236,17 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
     uint16_t* seed_A_origin = (uint16_t*)&seed_A_separated;
     memcpy(&seed_A_separated[2], seed_A, BYTES_SEED_A);
     for (kk = 0; kk < PARAMS_N; kk+=4) {
-        seed_A_origin[0] = (uint16_t) (kk + 0);
+        seed_A_origin[0] = UINT16_TO_LE(kk + 0);
         shake128((unsigned char*)(a_cols + 0*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
-        seed_A_origin[0] = (uint16_t) (kk + 1);
+        seed_A_origin[0] = UINT16_TO_LE(kk + 1);
         shake128((unsigned char*)(a_cols + 1*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
-        seed_A_origin[0] = (uint16_t) (kk + 2);
+        seed_A_origin[0] = UINT16_TO_LE(kk + 2);
         shake128((unsigned char*)(a_cols + 2*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
-        seed_A_origin[0] = (uint16_t) (kk + 3);
+        seed_A_origin[0] = UINT16_TO_LE(kk + 3);
         shake128((unsigned char*)(a_cols + 3*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
+        for (i = 0; i < 4 * PARAMS_N; i++) {
+            a_cols[i] = LE_TO_UINT16(a_cols[i]);
+        }
 
         for (i = 0; i < PARAMS_NBAR; i++) {
             uint16_t sum[PARAMS_N] = {0};
@@ -269,12 +275,13 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
     memcpy(&seed_A_separated_2[2], seed_A, BYTES_SEED_A);
     memcpy(&seed_A_separated_3[2], seed_A, BYTES_SEED_A);
     for (kk = 0; kk < PARAMS_N; kk+=4) {
-        seed_A_origin_0[0] = (uint16_t) (kk + 0);
-        seed_A_origin_1[0] = (uint16_t) (kk + 1);
-        seed_A_origin_2[0] = (uint16_t) (kk + 2);
-        seed_A_origin_3[0] = (uint16_t) (kk + 3);
+        seed_A_origin_0[0] = UINT16_TO_LE(kk + 0);
+        seed_A_origin_1[0] = UINT16_TO_LE(kk + 1);
+        seed_A_origin_2[0] = UINT16_TO_LE(kk + 2);
+        seed_A_origin_3[0] = UINT16_TO_LE(kk + 3);
         shake128_4x((unsigned char*)(a_cols), (unsigned char*)(a_cols + PARAMS_N), (unsigned char*)(a_cols + 2*PARAMS_N), (unsigned char*)(a_cols + 3*PARAMS_N), 
                     (unsigned long long)(2*PARAMS_N), seed_A_separated_0, seed_A_separated_1, seed_A_separated_2, seed_A_separated_3, 2 + BYTES_SEED_A);
+        // no need for LE_TO_UINT16(a_row[...]) since AVX2 is always on a little-endian platform
 
         for (i = 0; i < PARAMS_NBAR; i++) {
             __m256i a, b0, b1, b2, b3, acc[PARAMS_N/16];

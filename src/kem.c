@@ -36,6 +36,9 @@ int crypto_kem_keypair(unsigned char* pk, unsigned char* sk)
     shake_input_seedSE[0] = 0x5F;
     memcpy(&shake_input_seedSE[1], randomness_seedSE, CRYPTO_BYTES);
     shake((uint8_t*)S, 2*PARAMS_N*PARAMS_NBAR*sizeof(uint16_t), shake_input_seedSE, 1 + CRYPTO_BYTES);
+    for (size_t i = 0; i < 2 * PARAMS_N * PARAMS_NBAR; i++) {
+        S[i] = LE_TO_UINT16(S[i]);
+    }
     frodo_sample_n(S, PARAMS_N*PARAMS_NBAR);
     frodo_sample_n(E, PARAMS_N*PARAMS_NBAR);
     frodo_mul_add_as_plus_e(B, S, E, pk);
@@ -46,6 +49,9 @@ int crypto_kem_keypair(unsigned char* pk, unsigned char* sk)
     // Add s, pk and S to the secret key
     memcpy(sk_s, randomness_s, CRYPTO_BYTES);
     memcpy(sk_pk, pk, CRYPTO_PUBLICKEYBYTES);
+    for (size_t i = 0; i < 2 * PARAMS_N * PARAMS_NBAR; i++) {
+        S[i] = UINT16_TO_LE(S[i]);
+    }
     memcpy(sk_S, S, 2*PARAMS_N*PARAMS_NBAR);
 
     // Add H(pk) to the secret key
@@ -93,6 +99,9 @@ int crypto_kem_enc(unsigned char *ct, unsigned char *ss, const unsigned char *pk
     shake_input_seedSE[0] = 0x96;
     memcpy(&shake_input_seedSE[1], seedSE, CRYPTO_BYTES);
     shake((uint8_t*)Sp, (2*PARAMS_N+PARAMS_NBAR)*PARAMS_NBAR*sizeof(uint16_t), shake_input_seedSE, 1 + CRYPTO_BYTES);
+    for (size_t i = 0; i < (2 * PARAMS_N + PARAMS_NBAR) * PARAMS_NBAR; i++) {
+        Sp[i] = LE_TO_UINT16(Sp[i]);
+    }
     frodo_sample_n(Sp, PARAMS_N*PARAMS_NBAR);
     frodo_sample_n(Ep, PARAMS_N*PARAMS_NBAR);
     frodo_mul_add_sa_plus_e(Bp, Sp, Ep, pk_seedA);
@@ -142,6 +151,7 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
     const uint8_t *sk_s = &sk[0];
     const uint8_t *sk_pk = &sk[CRYPTO_BYTES];
     const uint16_t *sk_S = (uint16_t *) &sk[CRYPTO_BYTES + CRYPTO_PUBLICKEYBYTES];
+    uint16_t S[PARAMS_N * PARAMS_NBAR];                      // contains secret data
     const uint8_t *sk_pkh = &sk[CRYPTO_BYTES + CRYPTO_PUBLICKEYBYTES + 2*PARAMS_N*PARAMS_NBAR];
     const uint8_t *pk_seedA = &sk_pk[0];
     const uint8_t *pk_b = &sk_pk[BYTES_SEED_A];
@@ -156,10 +166,14 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
     uint8_t *Fin_k = &Fin[CRYPTO_CIPHERTEXTBYTES];           // contains secret data
     uint8_t shake_input_seedSEprime[1 + CRYPTO_BYTES];       // contains secret data
 
+    for (size_t i = 0; i < PARAMS_N * PARAMS_NBAR; i++) {
+        S[i] = LE_TO_UINT16(sk_S[i]);
+    }
+
     // Compute W = C - Bp*S (mod q), and decode the randomness mu
     frodo_unpack(Bp, PARAMS_N*PARAMS_NBAR, ct_c1, (PARAMS_LOGQ*PARAMS_N*PARAMS_NBAR)/8, PARAMS_LOGQ);
     frodo_unpack(C, PARAMS_NBAR*PARAMS_NBAR, ct_c2, (PARAMS_LOGQ*PARAMS_NBAR*PARAMS_NBAR)/8, PARAMS_LOGQ);
-    frodo_mul_bs(W, Bp, sk_S);
+    frodo_mul_bs(W, Bp, S);
     frodo_sub(W, C, W);
     frodo_key_decode((uint16_t*)muprime, W);
 
@@ -171,6 +185,9 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
     shake_input_seedSEprime[0] = 0x96;
     memcpy(&shake_input_seedSEprime[1], seedSEprime, CRYPTO_BYTES);
     shake((uint8_t*)Sp, (2*PARAMS_N+PARAMS_NBAR)*PARAMS_NBAR*sizeof(uint16_t), shake_input_seedSEprime, 1 + CRYPTO_BYTES);
+    for (size_t i = 0; i < (2*PARAMS_N+PARAMS_NBAR)*PARAMS_NBAR; i++) {
+        Sp[i] = LE_TO_UINT16(Sp[i]);
+    }
     frodo_sample_n(Sp, PARAMS_N*PARAMS_NBAR);
     frodo_sample_n(Ep, PARAMS_N*PARAMS_NBAR);
     frodo_mul_add_sa_plus_e(BBp, Sp, Ep, pk_seedA);
@@ -203,6 +220,7 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
     // Cleanup:
     clear_bytes((uint8_t *)W, PARAMS_NBAR*PARAMS_NBAR*sizeof(uint16_t));
     clear_bytes((uint8_t *)Sp, PARAMS_N*PARAMS_NBAR*sizeof(uint16_t));
+    clear_bytes((uint8_t *)S, PARAMS_N*PARAMS_NBAR*sizeof(uint16_t));
     clear_bytes((uint8_t *)Ep, PARAMS_N*PARAMS_NBAR*sizeof(uint16_t));
     clear_bytes((uint8_t *)Epp, PARAMS_NBAR*PARAMS_NBAR*sizeof(uint16_t));
     clear_bytes(muprime, BYTES_MU);
