@@ -49,7 +49,7 @@ int crypto_kem_keypair(unsigned char* pk, unsigned char* sk)
     // Add s, pk and S to the secret key
     memcpy(sk_s, randomness_s, CRYPTO_BYTES);
     memcpy(sk_pk, pk, CRYPTO_PUBLICKEYBYTES);
-    for (size_t i = 0; i < 2 * PARAMS_N * PARAMS_NBAR; i++) {
+    for (size_t i = 0; i < PARAMS_N * PARAMS_NBAR; i++) {
         S[i] = UINT16_TO_LE(S[i]);
     }
     memcpy(sk_S, S, 2*PARAMS_N*PARAMS_NBAR);
