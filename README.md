@@ -185,7 +185,7 @@ Other contributors include:
 # References
 
 [1]  Erdem Alkim, Joppe W. Bos, Léo Ducas, Karen Easterbrook, Brian LaMacchia, Patrick Longa, Ilya Mironov, Valeria Nikolaenko, Chris Peikert, Ananth Raghunathan, and Douglas Stebila, 
-"FrodoKEM: Learning With Errors Key Encapsulation". Submission to the NIST Post-Quantum Standardization project, 2017. The specification of FrodoKEM is available [`here`](https://frodokem.org/files/FrodoKEM-specification-20171130.pdf). 
+"FrodoKEM: Learning With Errors Key Encapsulation". Submission to the NIST Post-Quantum Standardization project, 2017-2019. The round 2 specification of FrodoKEM is available [`here`](https://frodokem.org/files/FrodoKEM-specification-20190330.pdf). 
 
 [2]  Joppe W. Bos, Craig Costello, Léo Ducas, Ilya Mironov, Michael Naehrig, Valeria Nikolaenko, Ananth Raghunathan, and Douglas Stebila, 
 "Frodo: Take off the ring! Practical, quantum-secure key exchange from LWE". 
