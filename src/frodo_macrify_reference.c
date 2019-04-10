@@ -22,8 +22,8 @@ int frodo_mul_add_as_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
     size_t A_len = PARAMS_N * PARAMS_N * sizeof(int16_t);    
     for (i = 0; i < PARAMS_N; i++) {                        
         for (j = 0; j < PARAMS_N; j += PARAMS_STRIPE_STEP) {
-            A[i*PARAMS_N + j] = i;                              // Loading values in the little-endian order
-            A[i*PARAMS_N + j + 1] = j;                                  
+            A[i*PARAMS_N + j] = UINT16_TO_LE(i);                              // Loading values in the little-endian order
+            A[i*PARAMS_N + j + 1] = UINT16_TO_LE(j);
         }
     }
     
@@ -46,10 +46,10 @@ int frodo_mul_add_as_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
         seed_A_origin[0] = UINT16_TO_LE((uint16_t) i);
         shake128((unsigned char*)(A + i*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
     }
+#endif    
     for (i = 0; i < PARAMS_N * PARAMS_N; i++) {
         A[i] = LE_TO_UINT16(A[i]);
     }
-#endif    
     memcpy(out, e, PARAMS_NBAR * PARAMS_N * sizeof(uint16_t));  
 
     for (i = 0; i < PARAMS_N; i++) {                            // Matrix multiplication-addition A*s + e
@@ -80,8 +80,8 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
     size_t A_len = PARAMS_N * PARAMS_N * sizeof(int16_t);      
     for (i = 0; i < PARAMS_N; i++) {                        
         for (j = 0; j < PARAMS_N; j += PARAMS_STRIPE_STEP) {
-            A[i*PARAMS_N + j] = i;                              // Loading values in the little-endian order
-            A[i*PARAMS_N + j + 1] = j;                                  
+            A[i*PARAMS_N + j] = UINT16_TO_LE(i);                              // Loading values in the little-endian order
+            A[i*PARAMS_N + j + 1] = UINT16_TO_LE(j);
         }
     }
     
@@ -104,10 +104,10 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
         seed_A_origin[0] = UINT16_TO_LE((uint16_t) i);
         shake128((unsigned char*)(A + i*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
     }
+#endif
     for (i = 0; i < PARAMS_N * PARAMS_N; i++) {
         A[i] = LE_TO_UINT16(A[i]);
     }
-#endif
     memcpy(out, e, PARAMS_NBAR * PARAMS_N * sizeof(uint16_t));
 
     for (i = 0; i < PARAMS_N; i++) {                            // Matrix multiplication-addition A*s + e
