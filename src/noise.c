@@ -14,9 +14,9 @@ void frodo_sample_n(uint16_t *s, const size_t n)
     unsigned int i, j;
 
     for (i = 0; i < n; ++i) {
-        uint8_t sample = 0;
+        uint16_t sample = 0;
         uint16_t prnd = s[i] >> 1;    // Drop the least significant bit
-        uint8_t sign = s[i] & 0x1;    // Pick the least significant bit
+        uint16_t sign = s[i] & 0x1;    // Pick the least significant bit
 
         // No need to compare with the last value.
         for (j = 0; j < (unsigned int)(CDF_TABLE_LEN - 1); j++) {
