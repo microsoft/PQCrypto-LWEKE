@@ -94,5 +94,21 @@
     #define USE_OPENSSL
 #endif
 
+#if defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+    #define LE_TO_UINT16(n) (((((unsigned short)(n) & 0xFF)) << 8) | (((unsigned short)(n) & 0xFF00) >> 8))
+    #define UINT16_TO_LE(n) (((((unsigned short)(n) & 0xFF)) << 8) | (((unsigned short)(n) & 0xFF00) >> 8))
+#elif defined(_WIN32) || (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__))
+    #define LE_TO_UINT16(n) (n)
+    #define UINT16_TO_LE(n) (n)
+#else
+    #define LE_TO_UINT16(n) (((uint8_t *) &(n))[0] | (((uint8_t *) &(n))[1] << 8))
+    static inline uint16_t UINT16_TO_LE(const uint16_t x) {
+        uint16_t y;
+        uint8_t *z = (uint8_t *) &y;
+        z[0] = x & 0xFF;
+        z[1] = x >> 8;
+        return y;
+    }
+#endif
 
 #endif
