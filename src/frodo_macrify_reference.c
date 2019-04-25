@@ -22,7 +22,7 @@ int frodo_mul_add_as_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
     size_t A_len = PARAMS_N * PARAMS_N * sizeof(int16_t);    
     for (i = 0; i < PARAMS_N; i++) {                        
         for (j = 0; j < PARAMS_N; j += PARAMS_STRIPE_STEP) {
-            A[i*PARAMS_N + j] = UINT16_TO_LE(i);                              // Loading values in the little-endian order
+            A[i*PARAMS_N + j] = UINT16_TO_LE(i);                // Loading values in the little-endian order
             A[i*PARAMS_N + j + 1] = UINT16_TO_LE(j);
         }
     }
@@ -80,7 +80,7 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
     size_t A_len = PARAMS_N * PARAMS_N * sizeof(int16_t);      
     for (i = 0; i < PARAMS_N; i++) {                        
         for (j = 0; j < PARAMS_N; j += PARAMS_STRIPE_STEP) {
-            A[i*PARAMS_N + j] = UINT16_TO_LE(i);                              // Loading values in the little-endian order
+            A[i*PARAMS_N + j] = UINT16_TO_LE(i);                // Loading values in the little-endian order
             A[i*PARAMS_N + j + 1] = UINT16_TO_LE(j);
         }
     }

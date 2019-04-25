@@ -42,7 +42,7 @@ int frodo_mul_add_as_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
 #endif
                                      
     for (j = 0; j < PARAMS_N; j += PARAMS_STRIPE_STEP) {
-        a_row_temp[j + 1 + 0*PARAMS_N] = UINT16_TO_LE(j);                     // Loading values in the little-endian order
+        a_row_temp[j + 1 + 0*PARAMS_N] = UINT16_TO_LE(j);       // Loading values in the little-endian order
         a_row_temp[j + 1 + 1*PARAMS_N] = UINT16_TO_LE(j);
         a_row_temp[j + 1 + 2*PARAMS_N] = UINT16_TO_LE(j);
         a_row_temp[j + 1 + 3*PARAMS_N] = UINT16_TO_LE(j);
@@ -50,7 +50,7 @@ int frodo_mul_add_as_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
 
     for (i = 0; i < PARAMS_N; i += 4) {
         for (j = 0; j < PARAMS_N; j += PARAMS_STRIPE_STEP) {    // Go through A, four rows at a time
-            a_row_temp[j + 0*PARAMS_N] = UINT16_TO_LE(i+0);                   // Loading values in the little-endian order                                
+            a_row_temp[j + 0*PARAMS_N] = UINT16_TO_LE(i+0);     // Loading values in the little-endian order                                
             a_row_temp[j + 1*PARAMS_N] = UINT16_TO_LE(i+1);
             a_row_temp[j + 2*PARAMS_N] = UINT16_TO_LE(i+2);
             a_row_temp[j + 3*PARAMS_N] = UINT16_TO_LE(i+3);
@@ -149,12 +149,12 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
 #endif
 
     for (i = 0, j = 0; i < PARAMS_N; i++, j += PARAMS_STRIPE_STEP) {
-        a_cols_temp[j] = UINT16_TO_LE(i);                                     // Loading values in the little-endian order
+        a_cols_temp[j] = UINT16_TO_LE(i);                       // Loading values in the little-endian order
     }
 
     for (kk = 0; kk < PARAMS_N; kk += PARAMS_STRIPE_STEP) {     // Go through A's columns, 8 (== PARAMS_STRIPE_STEP) columns at a time.       
         for (i = 0; i < (PARAMS_N*PARAMS_STRIPE_STEP); i += PARAMS_STRIPE_STEP) {
-            a_cols_temp[i + 1] = UINT16_TO_LE(kk);                            // Loading values in the little-endian order
+            a_cols_temp[i + 1] = UINT16_TO_LE(kk);              // Loading values in the little-endian order
         }
         
 #if !defined(USE_OPENSSL)
@@ -280,7 +280,6 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
         seed_A_origin_3[0] = UINT16_TO_LE(kk + 3);
         shake128_4x((unsigned char*)(a_cols), (unsigned char*)(a_cols + PARAMS_N), (unsigned char*)(a_cols + 2*PARAMS_N), (unsigned char*)(a_cols + 3*PARAMS_N), 
                     (unsigned long long)(2*PARAMS_N), seed_A_separated_0, seed_A_separated_1, seed_A_separated_2, seed_A_separated_3, 2 + BYTES_SEED_A);
-        // no need for LE_TO_UINT16(a_row[...]) since AVX2 is always on a little-endian platform
 
         for (i = 0; i < PARAMS_NBAR; i++) {
             __m256i a, b0, b1, b2, b3, acc[PARAMS_N/16];
