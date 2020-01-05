@@ -8,6 +8,9 @@
 #include "sha3/fips202.h"
 #include "random/random.h"
 
+#if (PARAMS_NBAR * PARAMS_NBAR * PARAMS_EXTRACTED_BITS % 8 != 0)
+#error You have modified the cryptographic parameters. FrodoKEM reference code assumes PARAMS_NBAR * PARAMS_NBAR * PARAMS_EXTRACTED_BITS is a multiple of 8.
+#endif
 
 int crypto_kem_keypair(unsigned char* pk, unsigned char* sk)
 { // FrodoKEM's key generation
