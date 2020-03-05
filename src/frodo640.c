@@ -21,6 +21,10 @@
 #define BYTES_MU (PARAMS_EXTRACTED_BITS*PARAMS_NBAR*PARAMS_NBAR)/8
 #define BYTES_PKHASH CRYPTO_BYTES
 
+#if (PARAMS_NBAR % 8 != 0)
+#error You have modified the cryptographic parameters. FrodoKEM assumes PARAMS_NBAR is a multiple of 8.
+#endif
+
 // Selecting SHAKE XOF function for the KEM and noise sampling
 #define shake     shake128
 
