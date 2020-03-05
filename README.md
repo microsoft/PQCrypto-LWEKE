@@ -22,7 +22,7 @@ The library was developed by [Microsoft Research](http://research.microsoft.com/
 * [`KAT folder`](KAT/): Known Answer Test (KAT) files for the KEM.
 * [`src folder`](src/): C and header files. Public APIs can be found in [`api_frodo640.h`](src/api_frodo640.h), [`api_frodo976.h`](src/api_frodo976.h) and [`api_frodo1344.h`](src/api_frodo1344.h).
 * [`Optimized matrix operations`](src/frodo_macrify.c): optimized implementation of the matrix operations. 
-* [`Reference matrix operations`](frodo_macrify_reference.c): reference implementation of the matrix operations.
+* [`Reference matrix operations`](src/frodo_macrify_reference.c): reference implementation of the matrix operations.
 * [`AES folder`](src/aes/): AES implementation.
 * [`random folder`](src/random/): randombytes function using the system random number generator.
 * [`sha3 folder`](src/sha3/): SHA-3 / SHAKE128 / SHAKE256 implementation.  
