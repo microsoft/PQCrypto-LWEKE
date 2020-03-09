@@ -56,7 +56,7 @@ int frodo_mul_add_as_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
         for (k = 0; k < PARAMS_NBAR; k++) {
             uint16_t sum = 0;
             for (j = 0; j < PARAMS_N; j++) {                                
-                sum += A[i*PARAMS_N + j] * s[k*PARAMS_N + j];  
+                sum += A[i*PARAMS_N + j] * s[j*PARAMS_NBAR + k];  
             }
             out[i*PARAMS_NBAR + k] += sum;                      // Adding e. No need to reduce modulo 2^15, extra bits are taken care of during packing later on.
         }
@@ -137,7 +137,7 @@ void frodo_mul_bs(uint16_t *out, const uint16_t *b, const uint16_t *s)
         for (j = 0; j < PARAMS_NBAR; j++) {
             out[i*PARAMS_NBAR + j] = 0;
             for (k = 0; k < PARAMS_N; k++) {
-                out[i*PARAMS_NBAR + j] += b[i*PARAMS_N + k] * s[j*PARAMS_N + k];
+                out[i*PARAMS_NBAR + j] += b[i*PARAMS_N + k] * s[k*PARAMS_NBAR + j];
             }
             out[i*PARAMS_NBAR + j] = (uint32_t)(out[i*PARAMS_NBAR + j]) & ((1<<PARAMS_LOGQ)-1);
         }
