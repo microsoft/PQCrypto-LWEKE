@@ -15,7 +15,7 @@ And the following KEM schemes using SHAKE128 for the generation of the public ma
 * FrodoKEM-976-SHAKE:  matching the post-quantum security of AES192.
 * FrodoKEM-1344-SHAKE: matching the post-quantum security of AES256.
 
-The library was developed by [Microsoft Research](http://research.microsoft.com/) for experimentation purposes.
+The library was developed by the [FrodoKEM team](https://frodokem.org/#team) and [Microsoft Research](http://research.microsoft.com/) for experimentation purposes.
 
 ## Contents
 
