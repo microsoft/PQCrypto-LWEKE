@@ -189,15 +189,6 @@ It includes some third party modules that are licensed differently. In particula
 - `tests/PQCtestKAT_kem<#>_shake.c`: copyrighted by Lawrence E. Bassham
 - `tests/rng.c`: copyrighted by Lawrence E. Bassham 
 
-## Contributors
-
-The library was developed by Microsoft Research using as basis the Frodo implementation from [`liboqs`](https://github.com/open-quantum-safe/liboqs),
-which in turn is based on [2].
-
-Other contributors include:
-- Erdem Alkim, while he was an intern with Microsoft Research.
-- Douglas Stebila.
-
 # References
 
 [1]  Erdem Alkim, Joppe W. Bos, Léo Ducas, Karen Easterbrook, Brian LaMacchia, Patrick Longa, Ilya Mironov, Valeria Nikolaenko, Chris Peikert, Ananth Raghunathan, and Douglas Stebila, 
