@@ -3,9 +3,11 @@
 # Created by Douglas Stebila
 
 import bitstring
-import math
 import secrets
 import struct
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 class FrodoKEM(object):
     """Reference implementation of FrodoKEM, specification version TBD, 2020
@@ -174,8 +176,6 @@ class FrodoKEM(object):
     def __shake128(msg, digest_len):
         """Returns a bytes object containing the SHAKE-128 hash of msg with 
         digest_len bytes of output"""
-        from cryptography.hazmat.backends import default_backend
-        from cryptography.hazmat.primitives import hashes
         shake_ctx = hashes.Hash(hashes.SHAKE128(digest_len), backend = default_backend())
         shake_ctx.update(msg)
         return shake_ctx.finalize()
@@ -184,8 +184,6 @@ class FrodoKEM(object):
     def __shake256(msg, digest_len):
         """Returns a bytes object containing the SHAKE-256 hash of msg with 
         digest_len bytes of output"""
-        from cryptography.hazmat.backends import default_backend
-        from cryptography.hazmat.primitives import hashes
         shake_ctx = hashes.Hash(hashes.SHAKE256(digest_len), backend = default_backend())
         shake_ctx.update(msg)
         return shake_ctx.finalize()
@@ -194,8 +192,6 @@ class FrodoKEM(object):
     def __aes128_16bytesonly(key, msg):
         """Returns a bytes object containing the AES-128 encryption of the 16-byte 
         message msg using the given key"""
-        from cryptography.hazmat.backends import default_backend
-        from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
         cipher_ctx = Cipher(algorithms.AES(key), modes.ECB(), backend = default_backend())
         encryptor_ctx = cipher_ctx.encryptor()
         return encryptor_ctx.update(msg) + encryptor_ctx.finalize()
@@ -465,7 +461,7 @@ class FrodoKEM(object):
         """Encapsulate against a public key to create a ciphertext and shared secret 
         (FrodoKEM specification, Algorithm 13)"""
         # Parse pk = seedA || b
-        assert len(pk) + self.len_seedA_bytes + self.D * self.n * self.nbar, "Incorrect public key length"
+        assert len(pk) == self.len_seedA_bytes + self.D * self.n * self.nbar / 8, "Incorrect public key length"
         seedA = pk[0 : self.len_seedA_bytes]
         b = pk[self.len_seedA_bytes:]
         # 1. Choose a uniformly random key mu in {0,1}^len_mu (length in bits)
