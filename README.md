@@ -1,6 +1,6 @@
 # FrodoKEM: Learning with Errors Key Encapsulation
 
-This C library implements **FrodoKEM**, an IND-CCA secure key encapsulation (KEM) protocol based on the well-studied Learning with Errors (LWE) problem [1], which in turn has close connections to conjectured-hard problems on generic, "algebraically unstructured" lattices.
+This C library implements **FrodoKEM**, an IND-CCA secure key encapsulation (KEM) protocol based on the well-studied Learning with Errors (LWE) problem [1], which in turn has close connections to conjectured-hard problems on generic, "algebraically unstructured" lattices.  This package also includes a Python reference implementation.
 **FrodoKEM** is conjectured to be secure against quantum computer attacks.
 
 Concretely, this library includes the following KEM schemes using AES128 for the generation of the public matrix "A":
@@ -15,23 +15,23 @@ And the following KEM schemes using SHAKE128 for the generation of the public ma
 * FrodoKEM-976-SHAKE:  matching the post-quantum security of AES192.
 * FrodoKEM-1344-SHAKE: matching the post-quantum security of AES256.
 
-The library was developed by [Microsoft Research](http://research.microsoft.com/) for experimentation purposes.
+The library was developed by the [FrodoKEM team](https://frodokem.org/#team) and [Microsoft Research](http://research.microsoft.com/) for experimentation purposes.
 
 ## Contents
 
-* [`KAT folder`](KAT/): Known Answer Test (KAT) files for the KEM.
-* [`src folder`](src/): C and header files. Public APIs can be found in [`api_frodo640.h`](src/api_frodo640.h), [`api_frodo976.h`](src/api_frodo976.h) and [`api_frodo1344.h`](src/api_frodo1344.h).
-* [`Optimized matrix operations`](src/frodo_macrify.c): optimized implementation of the matrix operations. 
-* [`Reference matrix operations`](src/frodo_macrify_reference.c): reference implementation of the matrix operations.
-* [`AES folder`](src/aes/): AES implementation.
-* [`random folder`](src/random/): randombytes function using the system random number generator.
-* [`sha3 folder`](src/sha3/): SHA-3 / SHAKE128 / SHAKE256 implementation.  
-* [`Test folder`](tests/): test files.  
-* [`Visual Studio folder`](VisualStudio/): Visual Studio 2015 files for compilation in Windows.
+* [`KAT` folder](KAT/): Known Answer Test (KAT) files for the KEM.
+* [`src` folder](src/): C and header files. Public APIs can be found in [`api_frodo640.h`](src/api_frodo640.h), [`api_frodo976.h`](src/api_frodo976.h) and [`api_frodo1344.h`](src/api_frodo1344.h).
+    * [Optimized matrix operations](src/frodo_macrify.c): optimized implementation of the matrix operations. 
+    * [Reference matrix operations](src/frodo_macrify_reference.c): reference implementation of the matrix operations.
+    * [`src/aes` folder](src/aes/): AES implementation.
+    * [`src/random` folder](src/random/): randombytes function using the system random number generator.
+    * [`src/sha3` folder](src/sha3/): SHA-3 / SHAKE128 / SHAKE256 implementation.  
+* [`tests` folder](tests/): test files.  
+* [`VisualStudio` folder](VisualStudio/): Visual Studio 2015 files for compilation in Windows.
 * [`Makefile`](Makefile): Makefile for compilation using the GNU GCC or clang compilers on Unix-like operative systems. 
-* [`License`](LICENSE): MIT license file.
-* [`Readme`](README.md): this readme file.
-
+* [`LICENSE`](LICENSE): MIT license file.
+* [`README.md`](README.md): this readme file.
+* [`python3` folder](python3): a Python3 reference implementation
 
 ### Complementary crypto functions
 
@@ -157,10 +157,25 @@ After building the solution file, there should be three executable files: `test_
 After building the solution file, add the generated `FrodoKEM-640.lib`, `FrodoKEM-976.lib` and `FrodoKEM-1344.lib` library files to the set of References for a project, 
 and add [`api_frodo640.h`](src/api_frodo640.h), [`api_frodo976.h`](src/api_frodo976.h) and [`api_frodo1344.h`](src/api_frodo1344.h) to the list of header files of a project.
 
+## Python3 implementation
+
+The [`python3`](python3) folder contains a Python3 implementation of FrodoKEM.
+This reference implementation is a line-by-line transcription of the pseudocode from the [FrodoKEM specification](https://frodokem.org) and includes extensive comments.
+The file [`frodokem.py`](python3/frodokem.py) contains a Python3 class implementing all 6 variants of FrodoKEM.
+The file [`nist_kat.py`](python3/nist_kat.py) contains a minimal Python port of the known answer test (KAT) code; it should generate the same output as the C version for the first test vector (except that the line `seed = ` will differ). 
+
+It can be run as follows:
+
+```sh
+pip3 install bitstring cryptography
+cd python3
+python3 nist_kat.py
+```
 
 ## License
 
 This software is licensed under the MIT License; see the LICENSE file for details.
+The Python3 implementation is licensed under the Creative Commons Zero v1.0 Universal license.
 It includes some third party modules that are licensed differently. In particular:
 
 - `src/aes/aes_c.c`: public domain
@@ -174,18 +189,9 @@ It includes some third party modules that are licensed differently. In particula
 - `tests/PQCtestKAT_kem<#>_shake.c`: copyrighted by Lawrence E. Bassham
 - `tests/rng.c`: copyrighted by Lawrence E. Bassham 
 
-## Contributors
-
-The library was developed by Microsoft Research using as basis the Frodo implementation from [`liboqs`](https://github.com/open-quantum-safe/liboqs),
-which in turn is based on [2].
-
-Other contributors include:
-- Erdem Alkim, while he was an intern with Microsoft Research.
-- Douglas Stebila.
-
 # References
 
-[1]  Erdem Alkim, Joppe W. Bos, Léo Ducas, Karen Easterbrook, Brian LaMacchia, Patrick Longa, Ilya Mironov, Valeria Nikolaenko, Chris Peikert, Ananth Raghunathan, and Douglas Stebila, 
+[1]  Erdem Alkim, Joppe W. Bos, Léo Ducas, Karen Easterbrook, Brian LaMacchia, Patrick Longa, Ilya Mironov, Michael Naehrig, Valeria Nikolaenko, Chris Peikert, Ananth Raghunathan, and Douglas Stebila, 
 "FrodoKEM: Learning With Errors Key Encapsulation". Submission to the NIST Post-Quantum Standardization project, 2017-2019. The round 2 specification of FrodoKEM is available [`here`](https://frodokem.org/files/FrodoKEM-specification-20190330.pdf). 
 
 [2]  Joppe W. Bos, Craig Costello, Léo Ducas, Ilya Mironov, Michael Naehrig, Valeria Nikolaenko, Ananth Raghunathan, and Douglas Stebila, 
