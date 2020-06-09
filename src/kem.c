@@ -213,6 +213,9 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
         memcpy(Fin_k, kprime, CRYPTO_BYTES);
     } else {
         // Load s to do ss = F(ct || s)
+        // This branch is executed when a malicious ciphertext is decapsulated
+        // and is necessary for security. Note that the known answer tests
+        // will not exercise this line of code but it should not be removed.
         memcpy(Fin_k, sk_s, CRYPTO_BYTES);
     }
     shake(ss, CRYPTO_BYTES, Fin, CRYPTO_CIPHERTEXTBYTES + CRYPTO_BYTES);
