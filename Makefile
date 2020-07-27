@@ -160,6 +160,7 @@ tests: lib640 lib976 lib1344 tests/ds_benchmark.h
 	$(CC) $(CFLAGS) -L./frodo640 tests/test_KEM640.c -lfrodo $(LDFLAGS) -o frodo640/test_KEM $(ARM_SETTING)
 	$(CC) $(CFLAGS) -L./frodo976 tests/test_KEM976.c -lfrodo $(LDFLAGS) -o frodo976/test_KEM $(ARM_SETTING)
 	$(CC) $(CFLAGS) -L./frodo1344 tests/test_KEM1344.c -lfrodo $(LDFLAGS) -o frodo1344/test_KEM $(ARM_SETTING)
+	$(CC) $(CFLAGS) -L./frodo640 tests/test_KEM640_valgrind.c -lfrodo $(LDFLAGS) -o frodo640/test_KEM_valgrind $(ARM_SETTING)
 
 lib640_for_KATs: $(KEM_FRODO640_OBJS) $(AES_OBJS) $(AES_NI_OBJS) $(SHAKE_OBJS) $(SHAKEx4_OBJS)
 	$(AR) frodo640/libfrodo_for_testing.a $^
