@@ -7,8 +7,17 @@
 #include "../src/random/random.h"
 #include "../src/sha3/fips202.h"
 
+#ifdef DO_VALGRIND_CHECK
+#include <valgrind/memcheck.h>
+#endif
+
+#ifdef DO_VALGRIND_CHECK
+#define KEM_TEST_ITERATIONS   1
+#define KEM_BENCH_SECONDS     0
+#else
 #define KEM_TEST_ITERATIONS 100
 #define KEM_BENCH_SECONDS     1
+#endif
 
 
 static int kem_test(const char *named_parameters, int iterations) 
@@ -20,7 +29,15 @@ static int kem_test(const char *named_parameters, int iterations)
     unsigned char bytes[4];
     uint32_t* pos = (uint32_t*)bytes;
     uint8_t Fin[CRYPTO_CIPHERTEXTBYTES + CRYPTO_BYTES];
-    
+
+    #ifdef DO_VALGRIND_CHECK
+        if (!RUNNING_ON_VALGRIND) {
+            fprintf(stderr, "This test can only usefully be run inside valgrind.\n");
+            fprintf(stderr, "valgrind frodo640/test_KEM (or frodo976 or frodo1344)\n");
+            exit(1);
+        }
+    #endif
+
     printf("\n");
     printf("=============================================================================================================================\n");
     printf("Testing correctness of key encapsulation mechanism (KEM), system %s, tests for %d iterations\n", named_parameters, iterations);
