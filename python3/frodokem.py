@@ -256,6 +256,25 @@ class FrodoKEM(object):
             for l in range(8):
                 b.set((B[i] >> l) % 2, 8*i+l)
         return b
+
+    @staticmethod
+    def __ctverify(a, b):
+        """Comapres two equal-length arrays in constant time; returns True if equal, False if any element differs."""
+        r = True
+        for i in range(len(a)):
+            r = r and (a[i] == b[i])
+        return r
+
+    @staticmethod
+    def __ctselect(a, b, selector):
+        """Select one of two equal-length byte arrays. If selector True, use a, else use b."""
+        mask = 0
+        for i in range(8):
+            mask = mask | (selector << i)
+        r = bytearray()
+        for i in range(len(a)):
+            r.append((a[i] & mask) | (b[i] & ~mask))
+        return bytes(r)
     
     def encode(self, k):
         """Encode a bitstring (represented in Python as a bytes object) as a mod-q 
@@ -599,13 +618,15 @@ class FrodoKEM(object):
         # 15. C' = V + Frodo.Encode(muprime)
         Cprime = self.__matrix_add(V, self.encode(muprime))
         self.__print_intermediate_value("C'", Cprime)
-        # 16. if B' || C == B'' || C' then
-        if Bprime + C == Bprimeprime + Cprime:
-            # 17. return ss = SHAKE(c1 || c2 || k', len_ss) (length in bits)
-            ss = self.shake(c1 + c2 + kprime, self.len_ss_bytes)
-        # 18. else
-        else:
-            # 19. return ss = SHAKE(c1 || c2 || s, len_ss) (length in bits)
-            ss = self.shake(c1 + c2 + s, self.len_ss_bytes)
+        # 16. ss0 = SHAKE(c1 || c2 || k', len_ss) (length in bits)
+        ss0 = self.shake(c1 + c2 + kprime, self.len_ss_bytes)
+        # 17. ss1 = SHAKE(c1 || c2 || k', len_ss) (length in bits)
+        ss1 = self.shake(c1 + c2 + kprime, self.len_ss_bytes)
+        # 18. (in constant time) ss = ss0 if (B' || C == B'' || C') else ss = ss1
+        # Needs to avoid branching on secret data as per:
+        #     Qian Guo, Thomas Johansson, Alexander Nilsson. A key-recovery timing attack on post-quantum 
+        #     primitives using the Fujisaki-Okamoto transformation and its application on FrodoKEM. In CRYPTO 2020.
+        use_ss0 = self.__ctverify(Bprime + C, Bprimeprime + Cprime)
+        ss = self.__ctselect(ss0, ss1, use_ss0)
         assert len(ss) == self.len_ss_bytes
         return ss
