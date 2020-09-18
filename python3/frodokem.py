@@ -624,7 +624,7 @@ class FrodoKEM(object):
         #     primitives using the Fujisaki-Okamoto transformation and its application on FrodoKEM. In CRYPTO 2020.
         use_kprime = self.__ctverify(Bprime + C, Bprimeprime + Cprime)
         kbar = self.__ctselect(kprime, s, use_kprime)
-        # 16. ss = SHAKE(c1 || c2 || kbar, len_ss) (length in bits)
+        # 17. ss = SHAKE(c1 || c2 || kbar, len_ss) (length in bits)
         ss = self.shake(c1 + c2 + kbar, self.len_ss_bytes)
         assert len(ss) == self.len_ss_bytes
         return ss
