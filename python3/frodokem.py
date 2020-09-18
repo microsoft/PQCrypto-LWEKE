@@ -618,15 +618,13 @@ class FrodoKEM(object):
         # 15. C' = V + Frodo.Encode(muprime)
         Cprime = self.__matrix_add(V, self.encode(muprime))
         self.__print_intermediate_value("C'", Cprime)
-        # 16. ss0 = SHAKE(c1 || c2 || k', len_ss) (length in bits)
-        ss0 = self.shake(c1 + c2 + kprime, self.len_ss_bytes)
-        # 17. ss1 = SHAKE(c1 || c2 || s, len_ss) (length in bits)
-        ss1 = self.shake(c1 + c2 + s, self.len_ss_bytes)
-        # 18. (in constant time) ss = ss0 if (B' || C == B'' || C') else ss = ss1
+        # 16. (in constant time) kbar = kprime if (B' || C == B'' || C') else kbar = s
         # Needs to avoid branching on secret data as per:
         #     Qian Guo, Thomas Johansson, Alexander Nilsson. A key-recovery timing attack on post-quantum 
         #     primitives using the Fujisaki-Okamoto transformation and its application on FrodoKEM. In CRYPTO 2020.
-        use_ss0 = self.__ctverify(Bprime + C, Bprimeprime + Cprime)
-        ss = self.__ctselect(ss0, ss1, use_ss0)
+        use_kprime = self.__ctverify(Bprime + C, Bprimeprime + Cprime)
+        kbar = self.__ctselect(kprime, s, use_kprime)
+        # 16. ss = SHAKE(c1 || c2 || kbar, len_ss) (length in bits)
+        ss = self.shake(c1 + c2 + kbar, self.len_ss_bytes)
         assert len(ss) == self.len_ss_bytes
         return ss
