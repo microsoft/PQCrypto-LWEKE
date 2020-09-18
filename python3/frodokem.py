@@ -259,7 +259,7 @@ class FrodoKEM(object):
 
     @staticmethod
     def __ctverify(a, b):
-        """Comapres two equal-length arrays in constant time; returns True if equal, False if any element differs."""
+        """Compares two equal-length arrays in constant time; returns True if equal, False if any element differs."""
         r = True
         for i in range(len(a)):
             r = r and (a[i] == b[i])
