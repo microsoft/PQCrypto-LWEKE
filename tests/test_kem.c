@@ -4,6 +4,8 @@
 * Abstract: benchmarking/testing KEM scheme
 *********************************************************************************************/
 
+#include "../src/random/random.h"
+
 #define KEM_TEST_ITERATIONS 100
 #define KEM_BENCH_SECONDS     1
 
@@ -14,6 +16,8 @@ static int kem_test(const char *named_parameters, int iterations)
     uint8_t sk[CRYPTO_SECRETKEYBYTES];
     uint8_t ss_encap[CRYPTO_BYTES], ss_decap[CRYPTO_BYTES];
     uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
+    unsigned char bytes[4];
+    uint32_t* pos = (uint32_t*)bytes;
     
     printf("\n");
     printf("=============================================================================================================================\n");
@@ -27,6 +31,17 @@ static int kem_test(const char *named_parameters, int iterations)
         if (memcmp(ss_encap, ss_decap, CRYPTO_BYTES) != 0) {
             printf("\n ERROR!\n");
 	        return false; 
+        }
+
+        // Testing decapsulation after changing one random bit in ct
+        randombytes(bytes, 4);
+        *pos %= CRYPTO_CIPHERTEXTBYTES;
+        ct[*pos] ^= 1;
+        crypto_kem_dec(ss_decap, ct, sk);
+        
+        if (memcmp(ss_encap, ss_decap, CRYPTO_BYTES) == 0) {
+            printf("\n ERROR!\n");
+	        return false;
         }
     }
     printf("Tests PASSED. All session keys matched.\n");
