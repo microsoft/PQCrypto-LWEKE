@@ -5,6 +5,7 @@
 *********************************************************************************************/
 
 #include "../src/random/random.h"
+#include "../src/sha3/fips202.h"
 
 #define KEM_TEST_ITERATIONS 100
 #define KEM_BENCH_SECONDS     1
@@ -18,6 +19,7 @@ static int kem_test(const char *named_parameters, int iterations)
     uint8_t ct[CRYPTO_CIPHERTEXTBYTES];
     unsigned char bytes[4];
     uint32_t* pos = (uint32_t*)bytes;
+    uint8_t Fin[CRYPTO_CIPHERTEXTBYTES + CRYPTO_BYTES];
     
     printf("\n");
     printf("=============================================================================================================================\n");
@@ -29,18 +31,23 @@ static int kem_test(const char *named_parameters, int iterations)
         crypto_kem_enc(ct, ss_encap, pk);
         crypto_kem_dec(ss_decap, ct, sk);
         if (memcmp(ss_encap, ss_decap, CRYPTO_BYTES) != 0) {
-            printf("\n ERROR!\n");
+            printf("\n ERROR -- encapsulation/decapsulation mechanism failed!\n");
 	        return false; 
         }
 
-        // Testing decapsulation after changing one random bit in ct
+        // Testing decapsulation after changing random bits of a random 16-bit digit of ct
         randombytes(bytes, 4);
-        *pos %= CRYPTO_CIPHERTEXTBYTES;
-        ct[*pos] ^= 1;
+        *pos %= CRYPTO_CIPHERTEXTBYTES/2;
+        ((uint16_t*)ct)[*pos] ^= *pos;
         crypto_kem_dec(ss_decap, ct, sk);
         
-        if (memcmp(ss_encap, ss_decap, CRYPTO_BYTES) == 0) {
-            printf("\n ERROR!\n");
+        // Compute ss = F(ct || s) with modified ct
+        memcpy(Fin, ct, CRYPTO_CIPHERTEXTBYTES);
+        memcpy(&Fin[CRYPTO_CIPHERTEXTBYTES], sk, CRYPTO_BYTES);
+        shake(ss_encap, CRYPTO_BYTES, Fin, CRYPTO_CIPHERTEXTBYTES + CRYPTO_BYTES);
+        
+        if (memcmp(ss_encap, ss_decap, CRYPTO_BYTES) != 0) {
+            printf("\n ERROR -- changing random bits of the ciphertext should cause a failure!\n");
 	        return false;
         }
     }
