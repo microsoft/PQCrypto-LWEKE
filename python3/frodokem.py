@@ -5,6 +5,7 @@
 import bitstring
 import secrets
 import struct
+import warnings
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -41,7 +42,7 @@ class FrodoKEM(object):
             self.gen = self.genSHAKE128
         else:
             assert "Unknown variant"
-        print("WARNING: This Python3 implementation of FrodoKEM is not designed to be fast or secure, and may leak secret information via timing or other side channels; it should not be used in production environments.")
+        warnings.warn("WARNING: This Python3 implementation of FrodoKEM is not designed to be fast or secure, and may leak secret information via timing or other side channels; it should not be used in production environments.")
 
     def setParamsFrodo640(self):
         """Set the parameters for Frodo640"""
