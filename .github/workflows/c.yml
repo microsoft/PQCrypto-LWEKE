@@ -1,4 +1,4 @@
-name: Continuous integration
+name: Test C implementation
 
 on:
   push:
