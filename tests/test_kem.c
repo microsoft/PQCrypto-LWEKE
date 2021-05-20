@@ -38,6 +38,9 @@ static int kem_test(const char *named_parameters, int iterations)
         // Testing decapsulation after changing random bits of a random 16-bit digit of ct
         randombytes(bytes, 4);
         *pos %= CRYPTO_CIPHERTEXTBYTES/2;
+        if (*pos == 0) {
+            *pos = 1;
+        }
         ((uint16_t*)ct)[*pos] ^= *pos;
         crypto_kem_dec(ss_decap, ct, sk);
         
