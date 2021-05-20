@@ -1,4 +1,5 @@
-# FrodoKEM: Learning with Errors Key Encapsulation
+FrodoKEM: Learning with Errors Key Encapsulation
+================================================
 
 This C library implements **FrodoKEM**, an IND-CCA secure key encapsulation (KEM) protocol based on the well-studied Learning with Errors (LWE) problem [1], which in turn has close connections to conjectured-hard problems on generic, "algebraically unstructured" lattices.  This package also includes a Python reference implementation.
 **FrodoKEM** is conjectured to be secure against quantum computer attacks.
