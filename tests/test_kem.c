@@ -75,7 +75,7 @@ static void kem_bench(const int seconds)
 }
 
 
-int main() 
+int main(int argc, char **argv) 
 {
     int OK = true;
 
@@ -84,8 +84,11 @@ int main()
         goto exit;
     }
 
-    PRINT_TIMER_HEADER
-    kem_bench(KEM_BENCH_SECONDS);
+    if ((argc > 1) && (strcmp("nobench", argv[1]) == 0)) {}
+    else {
+        PRINT_TIMER_HEADER
+        kem_bench(KEM_BENCH_SECONDS);
+    }
 
 exit:
     return (OK == true) ? EXIT_SUCCESS : EXIT_FAILURE;

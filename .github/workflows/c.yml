@@ -40,21 +40,22 @@ jobs:
     - name: Frodo1344-SHAKE KATs
       if: ${{ matrix.generation_a == 'SHAKE128' }}
       run: frodo1344/PQCtestKAT_kem_shake
-  test-asan:
+  test-sanitize:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         generation_a: ['AES128', 'SHAKE128']
+        sanitizer: ['address', 'undefined']
     steps:
     - uses: actions/checkout@v2
     - name: Build
       env: 
         GENERATION_A: ${{ matrix.generation_a }}
-        EXTRA_CFLAGS: -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fsanitize=address
+        EXTRA_CFLAGS: -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fsanitize=${{ matrix.sanitizer }}
       run: make CC=clang-11
     - name: Frodo640
-      run: frodo640/test_KEM
+      run: frodo640/test_KEM nobench
     - name: Frodo976
-      run: frodo976/test_KEM
+      run: frodo976/test_KEM nobench
     - name: Frodo1344
-      run: frodo1344/test_KEM
+      run: frodo1344/test_KEM nobench
