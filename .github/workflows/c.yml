@@ -2,7 +2,17 @@ name: Test C implementation
 
 on:
   push:
+    paths:
+      - '.github/workflows/c.yml'
+      - 'KAT/**'
+      - 'src/**'
+      - 'tests/**'
   pull_request:
+    paths:
+      - '.github/workflows/c.yml'
+      - 'KAT/**'
+      - 'src/**'
+      - 'tests/**'
 
 jobs:
   test-basic:
