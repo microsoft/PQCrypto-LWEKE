@@ -22,33 +22,22 @@ jobs:
       run: frodo976/test_KEM
     - name: Frodo1344
       run: frodo1344/test_KEM
-  test-KATs:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        generation_a: ['AES128', 'SHAKE128']
-    steps:
-    - uses: actions/checkout@v2
-    - name: Build
-      env: 
-        GENERATION_A: ${{ matrix.generation_a }}
-      run: make
-    - name: Frodo640-AES
+    - name: Frodo640-AES KATs
       if: ${{ matrix.generation_a == 'AES128' }}
       run: frodo640/PQCtestKAT_kem
-    - name: Frodo640-SHAKE
+    - name: Frodo640-SHAKE KATs
       if: ${{ matrix.generation_a == 'SHAKE128' }}
       run: frodo640/PQCtestKAT_kem_shake
-    - name: Frodo976-AES
+    - name: Frodo976-AES KATs
       if: ${{ matrix.generation_a == 'AES128' }}
       run: frodo976/PQCtestKAT_kem
-    - name: Frodo976-SHAKE
+    - name: Frodo976-SHAKE KATs
       if: ${{ matrix.generation_a == 'SHAKE128' }}
       run: frodo976/PQCtestKAT_kem_shake
-    - name: Frodo1344-AES
+    - name: Frodo1344-AES KATs
       if: ${{ matrix.generation_a == 'AES128' }}
       run: frodo1344/PQCtestKAT_kem
-    - name: Frodo1344-SHAKE
+    - name: Frodo1344-SHAKE KATs
       if: ${{ matrix.generation_a == 'SHAKE128' }}
       run: frodo1344/PQCtestKAT_kem_shake
   test-asan:
