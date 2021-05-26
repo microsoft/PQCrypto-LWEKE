@@ -73,3 +73,25 @@ jobs:
       run: frodo976/test_KEM nobench
     - name: Frodo1344
       run: frodo1344/test_KEM nobench
+  test-valgrind-constant-time:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        generation_a: ['AES128', 'SHAKE128']
+        opt_level: ['REFERENCE', 'FAST_GENERIC', 'FAST']
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install valgrind
+      run: apt-get install -y valgrind
+    - name: Build
+      env: 
+        DO_VALGRIND_CHECK: TRUE
+        GENERATION_A: ${{ matrix.generation_a }}
+        OPT_LEVEL: ${{ matrix.opt_level }}
+      run: make CC=clang-11
+    - name: Frodo640
+      run: make check640
+    - name: Frodo976
+      run: make check976
+    - name: Frodo1344
+      run: make check1344
