@@ -67,7 +67,7 @@ jobs:
       env:
         GENERATION_A: ${{ matrix.generation_a }}
         OPT_LEVEL: ${{ matrix.opt_level }}
-        EXTRA_CFLAGS: -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fsanitize=${{ matrix.sanitizer }}
+        EXTRA_CFLAGS: -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fsanitize=${{ matrix.sanitizer }} -fno-sanitize-recover=${{ matrix.sanitizer }}
       run: make CC=clang-11
     - name: Frodo640
       run: frodo640/test_KEM nobench
