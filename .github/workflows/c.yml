@@ -4,12 +4,14 @@ on:
   push:
     paths:
       - '.github/workflows/c.yml'
+      - Makefile
       - 'KAT/**'
       - 'src/**'
       - 'tests/**'
   pull_request:
     paths:
       - '.github/workflows/c.yml'
+      - Makefile
       - 'KAT/**'
       - 'src/**'
       - 'tests/**'
