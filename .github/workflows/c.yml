@@ -20,18 +20,20 @@ jobs:
     strategy:
       matrix:
         generation_a: ['AES128', 'SHAKE128']
+        opt_level: ['REFERENCE', 'FAST_GENERIC', 'FAST']
     steps:
     - uses: actions/checkout@v2
     - name: Build
       env: 
         GENERATION_A: ${{ matrix.generation_a }}
+        OPT_LEVEL: ${{ matrix.opt_level }}
       run: make
     - name: Frodo640
-      run: frodo640/test_KEM
+      run: make check640
     - name: Frodo976
-      run: frodo976/test_KEM
+      run: make check976
     - name: Frodo1344
-      run: frodo1344/test_KEM
+      run: make check1344
     - name: Frodo640-AES KATs
       if: ${{ matrix.generation_a == 'AES128' }}
       run: frodo640/PQCtestKAT_kem
@@ -55,12 +57,14 @@ jobs:
     strategy:
       matrix:
         generation_a: ['AES128', 'SHAKE128']
+        opt_level: ['REFERENCE', 'FAST_GENERIC', 'FAST']
         sanitizer: ['address', 'undefined']
     steps:
     - uses: actions/checkout@v2
     - name: Build
       env: 
         GENERATION_A: ${{ matrix.generation_a }}
+        OPT_LEVEL: ${{ matrix.opt_level }}
         EXTRA_CFLAGS: -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fsanitize=${{ matrix.sanitizer }}
       run: make CC=clang-11
     - name: Frodo640
