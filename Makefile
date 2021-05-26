@@ -190,23 +190,23 @@ else
 	$(CC) $(CFLAGS) -L./frodo1344 tests/PQCtestKAT_kem1344.c tests/rng.c -lfrodo_for_testing $(LDFLAGS) -o frodo1344/PQCtestKAT_kem $(ARM_SETTING)
 endif
 
-check: check640 check976 check1344
+check: tests
 
-check640: tests
+test640:
 ifeq "$(DO_VALGRIND_CHECK)" "TRUE"
 	valgrind --tool=memcheck --error-exitcode=1 frodo640/test_KEM
 else
 	frodo640/test_KEM
 endif
 
-check976: tests
+test976:
 ifeq "$(DO_VALGRIND_CHECK)" "TRUE"
 	valgrind --tool=memcheck --error-exitcode=1 frodo976/test_KEM
 else
 	frodo976/test_KEM
 endif
 
-check1344: tests
+test1344:
 ifeq "$(DO_VALGRIND_CHECK)" "TRUE"
 	valgrind --tool=memcheck --error-exitcode=1 frodo1344/test_KEM
 else

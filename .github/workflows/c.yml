@@ -29,11 +29,11 @@ jobs:
         OPT_LEVEL: ${{ matrix.opt_level }}
       run: make
     - name: Frodo640
-      run: make check640
+      run: make test640
     - name: Frodo976
-      run: make check976
+      run: make test976
     - name: Frodo1344
-      run: make check1344
+      run: make test1344
     - name: Frodo640-AES KATs
       if: ${{ matrix.generation_a == 'AES128' }}
       run: frodo640/PQCtestKAT_kem
@@ -82,7 +82,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install valgrind
-      run: apt-get install -y valgrind
+      run: sudo apt-get install -y valgrind
     - name: Build
       env: 
         DO_VALGRIND_CHECK: TRUE
@@ -90,8 +90,8 @@ jobs:
         OPT_LEVEL: ${{ matrix.opt_level }}
       run: make CC=clang-11
     - name: Frodo640
-      run: make check640
+      run: make test640
     - name: Frodo976
-      run: make check976
+      run: make test976
     - name: Frodo1344
-      run: make check1344
+      run: make test1344
