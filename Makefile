@@ -194,21 +194,21 @@ check: tests
 
 test640:
 ifeq "$(DO_VALGRIND_CHECK)" "TRUE"
-	valgrind --tool=memcheck --error-exitcode=1 frodo640/test_KEM
+	valgrind --tool=memcheck --error-exitcode=1 --max-stackframe=20480000 frodo640/test_KEM
 else
 	frodo640/test_KEM
 endif
 
 test976:
 ifeq "$(DO_VALGRIND_CHECK)" "TRUE"
-	valgrind --tool=memcheck --error-exitcode=1 frodo976/test_KEM
+	valgrind --tool=memcheck --error-exitcode=1 --max-stackframe=20480000 frodo976/test_KEM
 else
 	frodo976/test_KEM
 endif
 
 test1344:
 ifeq "$(DO_VALGRIND_CHECK)" "TRUE"
-	valgrind --tool=memcheck --error-exitcode=1 frodo1344/test_KEM
+	valgrind --tool=memcheck --error-exitcode=1 --max-stackframe=20480000 frodo1344/test_KEM
 else
 	frodo1344/test_KEM
 endif
