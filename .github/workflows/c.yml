@@ -90,8 +90,14 @@ jobs:
         OPT_LEVEL: ${{ matrix.opt_level }}
       run: make CC=clang-11
     - name: Frodo640
+      env: 
+        DO_VALGRIND_CHECK: TRUE
       run: make test640
     - name: Frodo976
+      env: 
+        DO_VALGRIND_CHECK: TRUE
       run: make test976
     - name: Frodo1344
+      env: 
+        DO_VALGRIND_CHECK: TRUE
       run: make test1344
