@@ -13,11 +13,10 @@
 
 #ifdef DO_VALGRIND_CHECK
 #define KEM_TEST_ITERATIONS   1
-#define KEM_BENCH_SECONDS     0
 #else
 #define KEM_TEST_ITERATIONS 100
-#define KEM_BENCH_SECONDS     1
 #endif
+#define KEM_BENCH_SECONDS     1
 
 
 static int kem_test(const char *named_parameters, int iterations) 
@@ -47,6 +46,10 @@ static int kem_test(const char *named_parameters, int iterations)
         crypto_kem_keypair(pk, sk);
         crypto_kem_enc(ct, ss_encap, pk);
         crypto_kem_dec(ss_decap, ct, sk);
+#ifdef DO_VALGRIND_CHECK
+        VALGRIND_MAKE_MEM_DEFINED(ss_encap, CRYPTO_BYTES);
+        VALGRIND_MAKE_MEM_DEFINED(ss_decap, CRYPTO_BYTES);
+#endif
         if (memcmp(ss_encap, ss_decap, CRYPTO_BYTES) != 0) {
             printf("\n ERROR -- encapsulation/decapsulation mechanism failed!\n");
 	        return false; 
@@ -60,12 +63,18 @@ static int kem_test(const char *named_parameters, int iterations)
         }
         ((uint16_t*)ct)[*pos] ^= *pos;
         crypto_kem_dec(ss_decap, ct, sk);
-        
+#ifdef DO_VALGRIND_CHECK
+        VALGRIND_MAKE_MEM_DEFINED(ss_decap, CRYPTO_BYTES);
+#endif
+
         // Compute ss = F(ct || s) with modified ct
         memcpy(Fin, ct, CRYPTO_CIPHERTEXTBYTES);
         memcpy(&Fin[CRYPTO_CIPHERTEXTBYTES], sk, CRYPTO_BYTES);
         shake(ss_encap, CRYPTO_BYTES, Fin, CRYPTO_CIPHERTEXTBYTES + CRYPTO_BYTES);
         
+#ifdef DO_VALGRIND_CHECK
+        VALGRIND_MAKE_MEM_DEFINED(ss_encap, CRYPTO_BYTES);
+#endif
         if (memcmp(ss_encap, ss_decap, CRYPTO_BYTES) != 0) {
             printf("\n ERROR -- changing random bits of the ciphertext should cause a failure!\n");
 	        return false;
