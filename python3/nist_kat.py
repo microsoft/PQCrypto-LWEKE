@@ -11,6 +11,8 @@ class NISTKAT(object):
         """Generate a NIST KAT output for the given KEM"""
         rng = NISTKAT.NISTRNG()
         kem.randombytes = rng.randombytes
+        print("===============================================")
+        print(kem.variant)
         print("count = 0")
         print("seed = <unspecified>")
         (pk, sk) = kem.kem_keygen()

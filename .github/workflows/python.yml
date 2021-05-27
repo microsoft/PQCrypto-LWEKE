@@ -1,0 +1,23 @@
+name: Test Python implementation
+
+on:
+  push:
+    paths:
+      - '.github/workflows/python.yml'
+      - 'python3/**'
+  pull_request:
+    paths:
+      - '.github/workflows/python.yml'
+      - 'python3/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install prerequisites
+      run: pip3 install bitstring cryptography
+    - name: Run basic test
+      run: |
+        cd python3
+        python3 nist_kat.py

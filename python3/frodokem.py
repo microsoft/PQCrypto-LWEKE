@@ -21,6 +21,7 @@ class FrodoKEM(object):
         
         - variant: One of FrodoKEM-{640,976,1344}-{AES,SHAKE}"""
         self.print_intermediate_values = False
+        self.variant = variant
         self.randombytes = lambda k : bytes((secrets.randbits(8) for i in range(k)))
         if variant == "FrodoKEM-640-AES":
             self.setParamsFrodo640()

@@ -55,7 +55,12 @@ AR=ar rcs
 RANLIB=ranlib
 LN=ln -s
 
-CFLAGS= -O3 -std=gnu11 -Wall -Wextra -DNIX -D $(ARCHITECTURE) -D $(USE_OPT_LEVEL) -D $(USE_GENERATION_A) -D $(USING_OPENSSL)
+ifeq "$(EXTRA_CFLAGS)" ""
+CFLAGS= -O3 
+else
+CFLAGS= $(EXTRA_CFLAGS)
+endif
+CFLAGS+= -std=gnu11 -Wall -Wextra -DNIX -D $(ARCHITECTURE) -D $(USE_OPT_LEVEL) -D $(USE_GENERATION_A) -D $(USING_OPENSSL)
 ifeq "$(CC)" "gcc"
 CFLAGS+= -march=native
 endif
