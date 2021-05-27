@@ -5,6 +5,7 @@
 import bitstring
 import secrets
 import struct
+import warnings
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
@@ -41,6 +42,7 @@ class FrodoKEM(object):
             self.gen = self.genSHAKE128
         else:
             assert "Unknown variant"
+        warnings.warn("WARNING: This Python3 implementation of FrodoKEM is not designed to be fast or secure, and may leak secret information via timing or other side channels; it should not be used in production environments.")
 
     def setParamsFrodo640(self):
         """Set the parameters for Frodo640"""
@@ -259,11 +261,17 @@ class FrodoKEM(object):
 
     @staticmethod
     def __ctverify(a, b):
-        """Compares two equal-length arrays in constant time; returns True if equal, False if any element differs."""
-        r = True
+        """Compares two equal-length matrices of integers; returns True if equal, False if any element differs.
+        
+        For a secure implementation, this method must be implemented in constant-time. While 
+        the Python code here is similar to a typical constant-time implementation in C, the
+        internal representation of integers in implementations of Python means that this 
+        method may not be constant-time."""
+        r = 0
         for i in range(len(a)):
-            r = r and (a[i] == b[i])
-        return r
+            for j in range(len(a[i])):
+                r = r | (a[i][j] ^ b[i][j])
+        return r == 0
 
     @staticmethod
     def __ctselect(a, b, selector):

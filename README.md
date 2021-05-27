@@ -172,6 +172,8 @@ cd python3
 python3 nist_kat.py
 ```
 
+**WARNING**: This Python3 implementation of FrodoKEM is not designed to be fast or secure, and may leak secret information via timing or other side channels; it should not be used in production environments.
+
 ## License
 
 This software is licensed under the MIT License; see the LICENSE file for details.
