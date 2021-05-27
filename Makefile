@@ -5,8 +5,6 @@ ifeq "$(CC)" "gcc"
     COMPILER=gcc
 else ifeq "$(CC)" "clang"
     COMPILER=clang
-else ifeq "$(CC)" "clang-9"
-    COMPILER=clang-9
 endif
 
 ARCHITECTURE=_AMD64_
