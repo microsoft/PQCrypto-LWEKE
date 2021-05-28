@@ -174,7 +174,7 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
             for (k = 0; k < PARAMS_STRIPE_STEP; k += PARAMS_PARALLEL) {
                 uint16_t sum[PARAMS_PARALLEL] = {0};
                 for (j = 0; j < PARAMS_N; j++) {                // Matrix-vector multiplication
-                    uint16_t sp = s[i*PARAMS_N + j];
+                    int16_t sp = s[i*PARAMS_N + j];
                     sum[0] += sp * a_cols_t[(k+0)*PARAMS_N + j];
                     sum[1] += sp * a_cols_t[(k+1)*PARAMS_N + j];
                     sum[2] += sp * a_cols_t[(k+2)*PARAMS_N + j];
@@ -250,7 +250,7 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
         for (i = 0; i < PARAMS_NBAR; i++) {
             uint16_t sum[PARAMS_N] = {0};
             for (j = 0; j < 4; j++) {
-                uint16_t sp = s[i*PARAMS_N + kk + j];
+                int16_t sp = s[i*PARAMS_N + kk + j];
                 for (k = 0; k < PARAMS_N; k++) {                // Matrix-vector multiplication
                     sum[k] += sp * a_cols[(t+j)*PARAMS_N + k];
                 }
@@ -325,7 +325,7 @@ void frodo_mul_bs(uint16_t *out, const uint16_t *b, const uint16_t *s)
         for (j = 0; j < PARAMS_NBAR; j++) {
             out[i*PARAMS_NBAR + j] = 0;
             for (k = 0; k < PARAMS_N; k++) {
-                out[i*PARAMS_NBAR + j] += b[i*PARAMS_N + k] * s[j*PARAMS_N + k];
+                out[i*PARAMS_NBAR + j] += b[i*PARAMS_N + k] * (int16_t)s[j*PARAMS_N + k];
             }
             out[i*PARAMS_NBAR + j] = (uint32_t)(out[i*PARAMS_NBAR + j]) & ((1<<PARAMS_LOGQ)-1);
         }
@@ -343,7 +343,7 @@ void frodo_mul_add_sb_plus_e(uint16_t *out, const uint16_t *b, const uint16_t *s
         for (i = 0; i < PARAMS_NBAR; i++) {
             out[k*PARAMS_NBAR + i] = e[k*PARAMS_NBAR + i];
             for (j = 0; j < PARAMS_N; j++) {
-                out[k*PARAMS_NBAR + i] += s[k*PARAMS_N + j] * b[j*PARAMS_NBAR + i];
+                out[k*PARAMS_NBAR + i] += (int16_t)s[k*PARAMS_N + j] * b[j*PARAMS_NBAR + i];
             }
             out[k*PARAMS_NBAR + i] = (uint32_t)(out[k*PARAMS_NBAR + i]) & ((1<<PARAMS_LOGQ)-1);
         }
