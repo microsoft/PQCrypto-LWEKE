@@ -8,6 +8,9 @@
 #include "sha3/fips202.h"
 #include "random/random.h"
 
+#ifdef DO_VALGRIND_CHECK
+#include <valgrind/memcheck.h>
+#endif
 
 int crypto_kem_keypair(unsigned char* pk, unsigned char* sk)
 { // FrodoKEM's key generation
@@ -30,6 +33,9 @@ int crypto_kem_keypair(unsigned char* pk, unsigned char* sk)
 
     // Generate the secret value s, the seed for S and E, and the seed for the seed for A. Add seed_A to the public key
     randombytes(randomness, CRYPTO_BYTES + CRYPTO_BYTES + BYTES_SEED_A);
+#ifdef DO_VALGRIND_CHECK
+    VALGRIND_MAKE_MEM_UNDEFINED(randomness, CRYPTO_BYTES + CRYPTO_BYTES + BYTES_SEED_A);
+#endif
     shake(pk_seedA, BYTES_SEED_A, randomness_z, BYTES_SEED_A);
 
     // Generate S and E, and compute B = A*S + E. Generate A on-the-fly
@@ -62,6 +68,9 @@ int crypto_kem_keypair(unsigned char* pk, unsigned char* sk)
     clear_bytes((uint8_t *)E, PARAMS_N*PARAMS_NBAR*sizeof(uint16_t));
     clear_bytes(randomness, 2*CRYPTO_BYTES);
     clear_bytes(shake_input_seedSE, 1 + CRYPTO_BYTES);
+#ifdef DO_VALGRIND_CHECK
+    VALGRIND_MAKE_MEM_DEFINED(randomness, CRYPTO_BYTES + CRYPTO_BYTES + BYTES_SEED_A);
+#endif
     return 0;
 }
 
@@ -93,6 +102,9 @@ int crypto_kem_enc(unsigned char *ct, unsigned char *ss, const unsigned char *pk
     // pkh <- G_1(pk), generate random mu, compute (seedSE || k) = G_2(pkh || mu)
     shake(pkh, BYTES_PKHASH, pk, CRYPTO_PUBLICKEYBYTES);
     randombytes(mu, BYTES_MU);
+#ifdef DO_VALGRIND_CHECK
+    VALGRIND_MAKE_MEM_UNDEFINED(mu, BYTES_MU);
+#endif
     shake(G2out, CRYPTO_BYTES + CRYPTO_BYTES, G2in, BYTES_PKHASH + BYTES_MU);
 
     // Generate Sp and Ep, and compute Bp = Sp*A + Ep. Generate A on-the-fly
@@ -131,6 +143,9 @@ int crypto_kem_enc(unsigned char *ct, unsigned char *ss, const unsigned char *pk
     clear_bytes(G2out, 2*CRYPTO_BYTES);
     clear_bytes(Fin_k, CRYPTO_BYTES);
     clear_bytes(shake_input_seedSE, 1 + CRYPTO_BYTES);
+#ifdef DO_VALGRIND_CHECK
+    VALGRIND_MAKE_MEM_DEFINED(mu, BYTES_MU);
+#endif
     return 0;
 }
 
@@ -165,6 +180,10 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
     uint8_t *Fin_ct = &Fin[0];
     uint8_t *Fin_k = &Fin[CRYPTO_CIPHERTEXTBYTES];           // contains secret data
     uint8_t shake_input_seedSEprime[1 + CRYPTO_BYTES];       // contains secret data
+
+#ifdef DO_VALGRIND_CHECK
+    VALGRIND_MAKE_MEM_UNDEFINED(sk, CRYPTO_SECRETKEYBYTES);
+#endif
 
     for (size_t i = 0; i < PARAMS_N * PARAMS_NBAR; i++) {
         S[i] = LE_TO_UINT16(sk_S[i]);
@@ -226,5 +245,8 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
     clear_bytes(G2out, 2*CRYPTO_BYTES);
     clear_bytes(Fin_k, CRYPTO_BYTES);
     clear_bytes(shake_input_seedSEprime, 1 + CRYPTO_BYTES);
+#ifdef DO_VALGRIND_CHECK
+    VALGRIND_MAKE_MEM_DEFINED(sk, CRYPTO_SECRETKEYBYTES);
+#endif
     return 0;
 }

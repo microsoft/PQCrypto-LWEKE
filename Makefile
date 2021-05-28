@@ -55,11 +55,17 @@ AR=ar rcs
 RANLIB=ranlib
 LN=ln -s
 
+VALGRIND_CFLAGS=
+ifeq "$(DO_VALGRIND_CHECK)" "TRUE"
+VALGRIND_CFLAGS= -g -O0 -DDO_VALGRIND_CHECK
+endif
+
 ifeq "$(EXTRA_CFLAGS)" ""
 CFLAGS= -O3 
 else
 CFLAGS= $(EXTRA_CFLAGS)
 endif
+CFLAGS+= $(VALGRIND_CFLAGS)
 CFLAGS+= -std=gnu11 -Wall -Wextra -DNIX -D $(ARCHITECTURE) -D $(USE_OPT_LEVEL) -D $(USE_GENERATION_A) -D $(USING_OPENSSL)
 ifeq "$(CC)" "gcc"
 CFLAGS+= -march=native
@@ -183,6 +189,27 @@ else
 endif
 
 check: tests
+
+test640:
+ifeq "$(DO_VALGRIND_CHECK)" "TRUE"
+	valgrind --tool=memcheck --error-exitcode=1 --max-stackframe=20480000 frodo640/test_KEM
+else
+	frodo640/test_KEM
+endif
+
+test976:
+ifeq "$(DO_VALGRIND_CHECK)" "TRUE"
+	valgrind --tool=memcheck --error-exitcode=1 --max-stackframe=20480000 frodo976/test_KEM
+else
+	frodo976/test_KEM
+endif
+
+test1344:
+ifeq "$(DO_VALGRIND_CHECK)" "TRUE"
+	valgrind --tool=memcheck --error-exitcode=1 --max-stackframe=20480000 frodo1344/test_KEM
+else
+	frodo1344/test_KEM
+endif
 
 clean:
 	rm -rf objs *.req frodo640 frodo976 frodo1344

@@ -4,12 +4,14 @@ on:
   push:
     paths:
       - '.github/workflows/c.yml'
+      - Makefile
       - 'KAT/**'
       - 'src/**'
       - 'tests/**'
   pull_request:
     paths:
       - '.github/workflows/c.yml'
+      - Makefile
       - 'KAT/**'
       - 'src/**'
       - 'tests/**'
@@ -20,18 +22,20 @@ jobs:
     strategy:
       matrix:
         generation_a: ['AES128', 'SHAKE128']
+        opt_level: ['REFERENCE', 'FAST_GENERIC', 'FAST']
     steps:
     - uses: actions/checkout@v2
     - name: Build
       env: 
         GENERATION_A: ${{ matrix.generation_a }}
+        OPT_LEVEL: ${{ matrix.opt_level }}
       run: make
     - name: Frodo640
-      run: frodo640/test_KEM
+      run: make test640
     - name: Frodo976
-      run: frodo976/test_KEM
+      run: make test976
     - name: Frodo1344
-      run: frodo1344/test_KEM
+      run: make test1344
     - name: Frodo640-AES KATs
       if: ${{ matrix.generation_a == 'AES128' }}
       run: frodo640/PQCtestKAT_kem
@@ -55,13 +59,15 @@ jobs:
     strategy:
       matrix:
         generation_a: ['AES128', 'SHAKE128']
-        sanitizer: ['address', 'undefined']
+        opt_level: ['REFERENCE', 'FAST_GENERIC', 'FAST']
+        sanitizer: ['address'] # 'undefined' disabled for now
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      env: 
+      env:
         GENERATION_A: ${{ matrix.generation_a }}
-        EXTRA_CFLAGS: -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fsanitize=${{ matrix.sanitizer }}
+        OPT_LEVEL: ${{ matrix.opt_level }}
+        EXTRA_CFLAGS: -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fsanitize=${{ matrix.sanitizer }} -fno-sanitize-recover=${{ matrix.sanitizer }}
       run: make CC=clang-11
     - name: Frodo640
       run: frodo640/test_KEM nobench
@@ -69,3 +75,31 @@ jobs:
       run: frodo976/test_KEM nobench
     - name: Frodo1344
       run: frodo1344/test_KEM nobench
+  test-valgrind-constant-time:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        generation_a: ['AES128', 'SHAKE128']
+        opt_level: ['REFERENCE', 'FAST_GENERIC', 'FAST']
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install valgrind
+      run: sudo apt-get install -y valgrind
+    - name: Build
+      env:
+        DO_VALGRIND_CHECK: "TRUE"
+        GENERATION_A: ${{ matrix.generation_a }}
+        OPT_LEVEL: ${{ matrix.opt_level }}
+      run: make CC=clang-11
+    - name: Frodo640
+      env: 
+        DO_VALGRIND_CHECK: "TRUE"
+      run: make test640
+    - name: Frodo976
+      env: 
+        DO_VALGRIND_CHECK: "TRUE"
+      run: make test976
+    - name: Frodo1344
+      env: 
+        DO_VALGRIND_CHECK: "TRUE"
+      run: make test1344
