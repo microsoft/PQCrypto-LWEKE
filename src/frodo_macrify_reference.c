@@ -137,7 +137,7 @@ void frodo_mul_bs(uint16_t *out, const uint16_t *b, const uint16_t *s)
         for (j = 0; j < PARAMS_NBAR; j++) {
             out[i*PARAMS_NBAR + j] = 0;
             for (k = 0; k < PARAMS_N; k++) {
-                out[i*PARAMS_NBAR + j] += b[i*PARAMS_N + k] * s[j*PARAMS_N + k];
+                out[i*PARAMS_NBAR + j] += b[i*PARAMS_N + k] * (int16_t)s[j*PARAMS_N + k];
             }
             out[i*PARAMS_NBAR + j] = (uint32_t)(out[i*PARAMS_NBAR + j]) & ((1<<PARAMS_LOGQ)-1);
         }
@@ -155,7 +155,7 @@ void frodo_mul_add_sb_plus_e(uint16_t *out, const uint16_t *b, const uint16_t *s
         for (i = 0; i < PARAMS_NBAR; i++) {
             out[k*PARAMS_NBAR + i] = e[k*PARAMS_NBAR + i];
             for (j = 0; j < PARAMS_N; j++) {
-                out[k*PARAMS_NBAR + i] += s[k*PARAMS_N + j] * b[j*PARAMS_NBAR + i];
+                out[k*PARAMS_NBAR + i] += (int16_t)s[k*PARAMS_N + j] * b[j*PARAMS_NBAR + i];
             }
             out[k*PARAMS_NBAR + i] = (uint32_t)(out[k*PARAMS_NBAR + i]) & ((1<<PARAMS_LOGQ)-1);
         }
