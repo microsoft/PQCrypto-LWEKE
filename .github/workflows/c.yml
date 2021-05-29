@@ -60,7 +60,7 @@ jobs:
       matrix:
         generation_a: ['AES128', 'SHAKE128']
         opt_level: ['REFERENCE', 'FAST_GENERIC', 'FAST']
-        sanitizer: ['address'] # 'undefined' disabled for now
+        sanitizer: ['address', 'undefined']
     steps:
     - uses: actions/checkout@v2
     - name: Build
