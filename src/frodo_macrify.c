@@ -131,17 +131,17 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, uint16_t *e, const
   // T. Schneider, C. van Vredendaal, "The Matrix Reloaded: Multiplication Strategies in FrodoKEM". https://eprint.iacr.org/2021/711
     int i, j, q, p; 
     ALIGN_HEADER(32) uint16_t A[PARAMS_N*8] ALIGN_FOOTER(32) = {0};
-    
+
 #if defined(USE_AES128_FOR_A)
 #if !defined(USE_OPENSSL)
     uint8_t aes_key_schedule[16*11];
-    AES128_load_schedule(seed_A, aes_key_schedule);  
+    AES128_load_schedule(seed_A, aes_key_schedule);
 #else
-    EVP_CIPHER_CTX *aes_key_schedule;    
+    EVP_CIPHER_CTX *aes_key_schedule;
     int len;
-    if (!(aes_key_schedule = EVP_CIPHER_CTX_new())) handleErrors();    
-    if (1 != EVP_EncryptInit_ex(aes_key_schedule, EVP_aes_128_ecb(), NULL, seed_A, NULL)) handleErrors();    
-#endif  
+    if (!(aes_key_schedule = EVP_CIPHER_CTX_new())) handleErrors();
+    if (1 != EVP_EncryptInit_ex(aes_key_schedule, EVP_aes_128_ecb(), NULL, seed_A, NULL)) handleErrors();
+#endif
     // Initialize matrix used for encryption
     ALIGN_HEADER(32) uint16_t Ainit[PARAMS_N*8] ALIGN_FOOTER(32) = {0};
        
@@ -155,17 +155,17 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, uint16_t *e, const
         Ainit[6*PARAMS_N + j + 1] = UINT16_TO_LE(j);
         Ainit[7*PARAMS_N + j + 1] = UINT16_TO_LE(j);
     }
- 
+
     // Start matrix multiplication
-    for (i = 0; i < PARAMS_N; i+=8) {     
-        // Generate 8 rows of A on-the-fly using AES           
+    for (i = 0; i < PARAMS_N; i+=8) {
+        // Generate 8 rows of A on-the-fly using AES
         for (q = 0; q < 8; q++) {
             for (p = 0; p < PARAMS_N; p+=8) {
                 Ainit[q*PARAMS_N + p] = UINT16_TO_LE(i+q);
             }
         }
-       
-        size_t A_len = 8 * PARAMS_N * sizeof(uint16_t);         
+
+        size_t A_len = 8 * PARAMS_N * sizeof(uint16_t);
 #if !defined(USE_OPENSSL)
         AES128_ECB_enc_sch((uint8_t*)Ainit, A_len, aes_key_schedule, (uint8_t*)A);
 #else   
@@ -176,7 +176,7 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, uint16_t *e, const
     uint8_t seed_A_separated[2 + BYTES_SEED_A];
     uint16_t* seed_A_origin = (uint16_t*)&seed_A_separated;
     memcpy(&seed_A_separated[2], seed_A, BYTES_SEED_A);
-              
+
     // Start matrix multiplication
     for (i = 0; i < PARAMS_N; i+=8) {
         seed_A_origin[0] = UINT16_TO_LE(i + 0);
@@ -195,7 +195,7 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, uint16_t *e, const
         shake128((unsigned char*)(A + 6*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
         seed_A_origin[0] = UINT16_TO_LE(i + 7);
         shake128((unsigned char*)(A + 7*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A); 
-#else  // Using vector intrinsics             
+#else  // Using vector intrinsics
     uint8_t seed_A_separated_0[2 + BYTES_SEED_A];
     uint8_t seed_A_separated_1[2 + BYTES_SEED_A];
     uint8_t seed_A_separated_2[2 + BYTES_SEED_A];
@@ -208,7 +208,7 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, uint16_t *e, const
     memcpy(&seed_A_separated_1[2], seed_A, BYTES_SEED_A);
     memcpy(&seed_A_separated_2[2], seed_A, BYTES_SEED_A);
     memcpy(&seed_A_separated_3[2], seed_A, BYTES_SEED_A);
-              
+
     // Start matrix multiplication
     for (i = 0; i < PARAMS_N; i+=8) {
         // Generate hash output
@@ -217,17 +217,17 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, uint16_t *e, const
         seed_A_origin_1[0] = UINT16_TO_LE(i + 1);
         seed_A_origin_2[0] = UINT16_TO_LE(i + 2);
         seed_A_origin_3[0] = UINT16_TO_LE(i + 3);
-        shake128_4x((unsigned char*)(A + 0*PARAMS_N), (unsigned char*)(A + 1*PARAMS_N), (unsigned char*)(A + 2*PARAMS_N), (unsigned char*)(A + 3*PARAMS_N), 
+        shake128_4x((unsigned char*)(A + 0*PARAMS_N), (unsigned char*)(A + 1*PARAMS_N), (unsigned char*)(A + 2*PARAMS_N), (unsigned char*)(A + 3*PARAMS_N),
                     (unsigned long long)(2*PARAMS_N), seed_A_separated_0, seed_A_separated_1, seed_A_separated_2, seed_A_separated_3, 2 + BYTES_SEED_A);
         // Second 4 rows
         seed_A_origin_0[0] = UINT16_TO_LE(i + 4);
         seed_A_origin_1[0] = UINT16_TO_LE(i + 5);
         seed_A_origin_2[0] = UINT16_TO_LE(i + 6);
         seed_A_origin_3[0] = UINT16_TO_LE(i + 7);
-        shake128_4x((unsigned char*)(A + 4*PARAMS_N), (unsigned char*)(A + 5*PARAMS_N), (unsigned char*)(A + 6*PARAMS_N), (unsigned char*)(A + 7*PARAMS_N), 
+        shake128_4x((unsigned char*)(A + 4*PARAMS_N), (unsigned char*)(A + 5*PARAMS_N), (unsigned char*)(A + 6*PARAMS_N), (unsigned char*)(A + 7*PARAMS_N),
                     (unsigned long long)(2*PARAMS_N), seed_A_separated_0, seed_A_separated_1, seed_A_separated_2, seed_A_separated_3, 2 + BYTES_SEED_A);
 #endif
-#endif       
+#endif
 
 #if !defined(USE_AVX2)
         for (j = 0; j < PARAMS_NBAR; j++) {
@@ -245,8 +245,8 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, uint16_t *e, const
             }
         }
     }
-#else  // Using vector intrinsics                   
-        for (j = 0; j < PARAMS_NBAR; j++) {                  
+#else  // Using vector intrinsics
+        for (j = 0; j < PARAMS_NBAR; j++) {
             __m256i b, sp[8], acc;
             for (p = 0; p < 8; p++) {
                 sp[p] = _mm256_set1_epi16(s[j*PARAMS_N + i + p]);
@@ -261,13 +261,13 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, uint16_t *e, const
                 _mm256_store_si256((__m256i*)&e[j*PARAMS_N + q], acc);
             }
         }
-    }    
-#endif    
+    }
+#endif
     memcpy((unsigned char*)out, (unsigned char*)e, 2*PARAMS_N*PARAMS_NBAR);
-    
+
 #if defined(USE_AES128_FOR_A)
     AES128_free_schedule(aes_key_schedule);
-#endif    
+#endif
     return 1;
 }
 
