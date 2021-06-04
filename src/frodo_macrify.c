@@ -7,7 +7,7 @@
 #if defined(USE_AES128_FOR_A)
     #include "aes/aes.h"
 #elif defined (USE_SHAKE128_FOR_A)
-#if defined(WINDOWS) | !defined(USE_AVX2)
+#if !defined(USE_AVX2)
     #include "sha3/fips202.h"
 #else
     #include "sha3/fips202x4.h"
@@ -62,7 +62,7 @@ int frodo_mul_add_as_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
         if (1 != EVP_EncryptUpdate(aes_key_schedule, (uint8_t*)a_row, &len, (uint8_t*)a_row_temp, 4*PARAMS_N*sizeof(int16_t))) handleErrors();
 #endif
 #elif defined (USE_SHAKE128_FOR_A)       
-#if defined(WINDOWS) | !defined(USE_AVX2)
+#if !defined(USE_AVX2)
     uint8_t seed_A_separated[2 + BYTES_SEED_A];
     uint16_t* seed_A_origin = (uint16_t*)&seed_A_separated;
     memcpy(&seed_A_separated[2], seed_A, BYTES_SEED_A);
@@ -123,21 +123,16 @@ int frodo_mul_add_as_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
 }
 
 
-int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e, const uint8_t *seed_A)
+int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, uint16_t *e, const uint8_t *seed_A)
 { // Generate-and-multiply: generate matrix A (N x N) column-wise, multiply by s' on the left.
   // Inputs: s', e' (N_BAR x N)
   // Output: out = s'*A + e' (N_BAR x N)
-    int i, j, kk;
-
-    for (i = 0; i < (PARAMS_N*PARAMS_NBAR); i += 2) {
-        *((uint32_t*)&out[i]) = *((uint32_t*)&e[i]);
-    }
-
+  // The matrix multiplication uses the row-wise blocking and packing (RWCF) approach described in: J.W. Bos, M. Ofner, J. Renes, 
+  // T. Schneider, C. van Vredendaal, "The Matrix Reloaded: Multiplication Strategies in FrodoKEM". https://eprint.iacr.org/2021/711
+    int i, j, q, p; 
+    ALIGN_HEADER(32) uint16_t A[PARAMS_N*8] ALIGN_FOOTER(32) = {0};
+    
 #if defined(USE_AES128_FOR_A)
-    int k;
-    uint16_t a_cols[PARAMS_N*PARAMS_STRIPE_STEP] = {0};
-    ALIGN_HEADER(32) uint16_t a_cols_t[PARAMS_N*PARAMS_STRIPE_STEP] ALIGN_FOOTER(32) = {0};
-    uint16_t a_cols_temp[PARAMS_N*PARAMS_STRIPE_STEP] = {0};       
 #if !defined(USE_OPENSSL)
     uint8_t aes_key_schedule[16*11];
     AES128_load_schedule(seed_A, aes_key_schedule);  
@@ -146,171 +141,133 @@ int frodo_mul_add_sa_plus_e(uint16_t *out, const uint16_t *s, const uint16_t *e,
     int len;
     if (!(aes_key_schedule = EVP_CIPHER_CTX_new())) handleErrors();    
     if (1 != EVP_EncryptInit_ex(aes_key_schedule, EVP_aes_128_ecb(), NULL, seed_A, NULL)) handleErrors();    
-#endif
-
-    for (i = 0, j = 0; i < PARAMS_N; i++, j += PARAMS_STRIPE_STEP) {
-        a_cols_temp[j] = UINT16_TO_LE(i);                       // Loading values in the little-endian order
+#endif  
+    // Initialize matrix used for encryption
+    ALIGN_HEADER(32) uint16_t Ainit[PARAMS_N*8] ALIGN_FOOTER(32) = {0};
+       
+    for(j = 0; j < PARAMS_N; j+=8) {
+        Ainit[0*PARAMS_N + j + 1] = UINT16_TO_LE(j);
+        Ainit[1*PARAMS_N + j + 1] = UINT16_TO_LE(j);
+        Ainit[2*PARAMS_N + j + 1] = UINT16_TO_LE(j);
+        Ainit[3*PARAMS_N + j + 1] = UINT16_TO_LE(j);
+        Ainit[4*PARAMS_N + j + 1] = UINT16_TO_LE(j);
+        Ainit[5*PARAMS_N + j + 1] = UINT16_TO_LE(j);
+        Ainit[6*PARAMS_N + j + 1] = UINT16_TO_LE(j);
+        Ainit[7*PARAMS_N + j + 1] = UINT16_TO_LE(j);
     }
-
-    for (kk = 0; kk < PARAMS_N; kk += PARAMS_STRIPE_STEP) {     // Go through A's columns, 8 (== PARAMS_STRIPE_STEP) columns at a time.       
-        for (i = 0; i < (PARAMS_N*PARAMS_STRIPE_STEP); i += PARAMS_STRIPE_STEP) {
-            a_cols_temp[i + 1] = UINT16_TO_LE(kk);              // Loading values in the little-endian order
+ 
+    // Start matrix multiplication
+    for (i = 0; i < PARAMS_N; i+=8) {     
+        // Generate 8 rows of A on-the-fly using AES           
+        for (q = 0; q < 8; q++) {
+            for (p = 0; p < PARAMS_N; p+=8) {
+                Ainit[q*PARAMS_N + p] = UINT16_TO_LE(i+q);
+            }
         }
-        
+       
+        size_t A_len = 8 * PARAMS_N * sizeof(uint16_t);         
 #if !defined(USE_OPENSSL)
-        AES128_ECB_enc_sch((uint8_t*)a_cols_temp, PARAMS_N*PARAMS_STRIPE_STEP*sizeof(int16_t), aes_key_schedule, (uint8_t*)a_cols);
+        AES128_ECB_enc_sch((uint8_t*)Ainit, A_len, aes_key_schedule, (uint8_t*)A);
 #else   
-        if (1 != EVP_EncryptUpdate(aes_key_schedule, (uint8_t*)a_cols, &len, (uint8_t*)a_cols_temp, PARAMS_N*PARAMS_STRIPE_STEP*sizeof(int16_t))) handleErrors();
-#endif
-
-        for (i = 0; i < PARAMS_N; i++) {                        // Transpose a_cols to have access to it in the column-major order.
-            for (k = 0; k < PARAMS_STRIPE_STEP; k++) {
-                a_cols_t[k*PARAMS_N + i] = LE_TO_UINT16(a_cols[i*PARAMS_STRIPE_STEP + k]);
-            }
-        } 
-
-#if !defined(USE_AVX2)
-        for (i = 0; i < PARAMS_NBAR; i++) {
-            for (k = 0; k < PARAMS_STRIPE_STEP; k += PARAMS_PARALLEL) {
-                uint16_t sum[PARAMS_PARALLEL] = {0};
-                for (j = 0; j < PARAMS_N; j++) {                // Matrix-vector multiplication
-                    int16_t sp = s[i*PARAMS_N + j];
-                    sum[0] += sp * a_cols_t[(k+0)*PARAMS_N + j];
-                    sum[1] += sp * a_cols_t[(k+1)*PARAMS_N + j];
-                    sum[2] += sp * a_cols_t[(k+2)*PARAMS_N + j];
-                    sum[3] += sp * a_cols_t[(k+3)*PARAMS_N + j];
-                }
-                out[i*PARAMS_N + kk + k + 0] += sum[0];
-                out[i*PARAMS_N + kk + k + 2] += sum[2];
-                out[i*PARAMS_N + kk + k + 1] += sum[1];
-                out[i*PARAMS_N + kk + k + 3] += sum[3];
-            }
-        }
-    }
-#else  // Using vector intrinsics
-        for (i = 0; i < PARAMS_NBAR; i++) {
-            for (k = 0; k < PARAMS_STRIPE_STEP; k += PARAMS_PARALLEL) {
-                ALIGN_HEADER(32) uint32_t sum[8 * PARAMS_PARALLEL] ALIGN_FOOTER(32);
-                __m256i a[PARAMS_PARALLEL], b, acc[PARAMS_PARALLEL];
-                acc[0] = _mm256_setzero_si256();
-                acc[1] = _mm256_setzero_si256();
-                acc[2] = _mm256_setzero_si256();
-                acc[3] = _mm256_setzero_si256();
-                for (j = 0; j < PARAMS_N; j += 16) {            // Matrix-vector multiplication
-                    b = _mm256_load_si256((__m256i*)&s[i*PARAMS_N + j]);
-                    a[0] = _mm256_load_si256((__m256i*)&a_cols_t[(k+0)*PARAMS_N + j]);
-                    a[0] = _mm256_madd_epi16(a[0], b);
-                    acc[0] = _mm256_add_epi16(a[0], acc[0]);
-                    a[1] = _mm256_load_si256((__m256i*)&a_cols_t[(k+1)*PARAMS_N + j]);
-                    a[1] = _mm256_madd_epi16(a[1], b);
-                    acc[1] = _mm256_add_epi16(a[1], acc[1]);
-                    a[2] = _mm256_load_si256((__m256i*)&a_cols_t[(k+2)*PARAMS_N + j]);
-                    a[2] = _mm256_madd_epi16(a[2], b);
-                    acc[2] = _mm256_add_epi16(a[2], acc[2]);
-                    a[3] = _mm256_load_si256((__m256i*)&a_cols_t[(k+3)*PARAMS_N + j]);
-                    a[3] = _mm256_madd_epi16(a[3], b);
-                    acc[3] = _mm256_add_epi16(a[3], acc[3]);
-                }
-                _mm256_store_si256((__m256i*)(sum + (8*0)), acc[0]);
-                out[i*PARAMS_N + kk + k + 0] += sum[8*0 + 0] + sum[8*0 + 1] + sum[8*0 + 2] + sum[8*0 + 3] + sum[8*0 + 4] + sum[8*0 + 5] + sum[8*0 + 6] + sum[8*0 + 7];
-                _mm256_store_si256((__m256i*)(sum + (8*1)), acc[1]);
-                out[i*PARAMS_N + kk + k + 1] += sum[8*1 + 0] + sum[8*1 + 1] + sum[8*1 + 2] + sum[8*1 + 3] + sum[8*1 + 4] + sum[8*1 + 5] + sum[8*1 + 6] + sum[8*1 + 7];
-                _mm256_store_si256((__m256i*)(sum + (8*2)), acc[2]);
-                out[i*PARAMS_N + kk + k + 2] += sum[8*2 + 0] + sum[8*2 + 1] + sum[8*2 + 2] + sum[8*2 + 3] + sum[8*2 + 4] + sum[8*2 + 5] + sum[8*2 + 6] + sum[8*2 + 7];
-                _mm256_store_si256((__m256i*)(sum + (8*3)), acc[3]);
-                out[i*PARAMS_N + kk + k + 3] += sum[8*3 + 0] + sum[8*3 + 1] + sum[8*3 + 2] + sum[8*3 + 3] + sum[8*3 + 4] + sum[8*3 + 5] + sum[8*3 + 6] + sum[8*3 + 7];
-            }
-        }
-    }
-#endif
-    AES128_free_schedule(aes_key_schedule);
-
+        if (1 != EVP_EncryptUpdate(aes_key_schedule, (uint8_t*)A, &len, (uint8_t*)Ainit, A_len)) handleErrors();
+#endif 
 #elif defined (USE_SHAKE128_FOR_A)  // SHAKE128
-    int t=0;
-    ALIGN_HEADER(32) uint16_t a_cols[4*PARAMS_N] ALIGN_FOOTER(32) = {0};
-
-#if defined(WINDOWS) | !defined(USE_AVX2)
-    int k;
+#if !defined(USE_AVX2)
     uint8_t seed_A_separated[2 + BYTES_SEED_A];
     uint16_t* seed_A_origin = (uint16_t*)&seed_A_separated;
     memcpy(&seed_A_separated[2], seed_A, BYTES_SEED_A);
-    for (kk = 0; kk < PARAMS_N; kk+=4) {
-        seed_A_origin[0] = UINT16_TO_LE(kk + 0);
-        shake128((unsigned char*)(a_cols + 0*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
-        seed_A_origin[0] = UINT16_TO_LE(kk + 1);
-        shake128((unsigned char*)(a_cols + 1*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
-        seed_A_origin[0] = UINT16_TO_LE(kk + 2);
-        shake128((unsigned char*)(a_cols + 2*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
-        seed_A_origin[0] = UINT16_TO_LE(kk + 3);
-        shake128((unsigned char*)(a_cols + 3*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
-        for (i = 0; i < 4 * PARAMS_N; i++) {
-            a_cols[i] = LE_TO_UINT16(a_cols[i]);
-        }
-
-        for (i = 0; i < PARAMS_NBAR; i++) {
-            uint16_t sum[PARAMS_N] = {0};
-            for (j = 0; j < 4; j++) {
-                int16_t sp = s[i*PARAMS_N + kk + j];
-                for (k = 0; k < PARAMS_N; k++) {                // Matrix-vector multiplication
-                    sum[k] += sp * a_cols[(t+j)*PARAMS_N + k];
-                }
-             } 
-            for(k = 0; k < PARAMS_N; k++){
-                out[i*PARAMS_N + k] += sum[k];
-            }
-        }
-    }
-#else  // Using vector intrinsics
+              
+    // Start matrix multiplication
+    for (i = 0; i < PARAMS_N; i+=8) {
+        seed_A_origin[0] = UINT16_TO_LE(i + 0);
+        shake128((unsigned char*)(A + 0*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
+        seed_A_origin[0] = UINT16_TO_LE(i + 1);
+        shake128((unsigned char*)(A + 1*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
+        seed_A_origin[0] = UINT16_TO_LE(i + 2);
+        shake128((unsigned char*)(A + 2*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
+        seed_A_origin[0] = UINT16_TO_LE(i + 3);
+        shake128((unsigned char*)(A + 3*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
+        seed_A_origin[0] = UINT16_TO_LE(i + 4);
+        shake128((unsigned char*)(A + 4*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
+        seed_A_origin[0] = UINT16_TO_LE(i + 5);
+        shake128((unsigned char*)(A + 5*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
+        seed_A_origin[0] = UINT16_TO_LE(i + 6);
+        shake128((unsigned char*)(A + 6*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A);
+        seed_A_origin[0] = UINT16_TO_LE(i + 7);
+        shake128((unsigned char*)(A + 7*PARAMS_N), (unsigned long long)(2*PARAMS_N), seed_A_separated, 2 + BYTES_SEED_A); 
+#else  // Using vector intrinsics             
     uint8_t seed_A_separated_0[2 + BYTES_SEED_A];
     uint8_t seed_A_separated_1[2 + BYTES_SEED_A];
     uint8_t seed_A_separated_2[2 + BYTES_SEED_A];
     uint8_t seed_A_separated_3[2 + BYTES_SEED_A];
-    uint16_t* seed_A_origin_0 = (uint16_t*)&seed_A_separated_0;
-    uint16_t* seed_A_origin_1 = (uint16_t*)&seed_A_separated_1;
-    uint16_t* seed_A_origin_2 = (uint16_t*)&seed_A_separated_2;
-    uint16_t* seed_A_origin_3 = (uint16_t*)&seed_A_separated_3;
+    uint16_t *seed_A_origin_0 = (uint16_t*)&seed_A_separated_0;
+    uint16_t *seed_A_origin_1 = (uint16_t*)&seed_A_separated_1;
+    uint16_t *seed_A_origin_2 = (uint16_t*)&seed_A_separated_2;
+    uint16_t *seed_A_origin_3 = (uint16_t*)&seed_A_separated_3;
     memcpy(&seed_A_separated_0[2], seed_A, BYTES_SEED_A);
     memcpy(&seed_A_separated_1[2], seed_A, BYTES_SEED_A);
     memcpy(&seed_A_separated_2[2], seed_A, BYTES_SEED_A);
     memcpy(&seed_A_separated_3[2], seed_A, BYTES_SEED_A);
-    for (kk = 0; kk < PARAMS_N; kk+=4) {
-        seed_A_origin_0[0] = UINT16_TO_LE(kk + 0);
-        seed_A_origin_1[0] = UINT16_TO_LE(kk + 1);
-        seed_A_origin_2[0] = UINT16_TO_LE(kk + 2);
-        seed_A_origin_3[0] = UINT16_TO_LE(kk + 3);
-        shake128_4x((unsigned char*)(a_cols), (unsigned char*)(a_cols + PARAMS_N), (unsigned char*)(a_cols + 2*PARAMS_N), (unsigned char*)(a_cols + 3*PARAMS_N), 
+              
+    // Start matrix multiplication
+    for (i = 0; i < PARAMS_N; i+=8) {
+        // Generate hash output
+        // First 4 rows
+        seed_A_origin_0[0] = UINT16_TO_LE(i + 0);
+        seed_A_origin_1[0] = UINT16_TO_LE(i + 1);
+        seed_A_origin_2[0] = UINT16_TO_LE(i + 2);
+        seed_A_origin_3[0] = UINT16_TO_LE(i + 3);
+        shake128_4x((unsigned char*)(A + 0*PARAMS_N), (unsigned char*)(A + 1*PARAMS_N), (unsigned char*)(A + 2*PARAMS_N), (unsigned char*)(A + 3*PARAMS_N), 
                     (unsigned long long)(2*PARAMS_N), seed_A_separated_0, seed_A_separated_1, seed_A_separated_2, seed_A_separated_3, 2 + BYTES_SEED_A);
+        // Second 4 rows
+        seed_A_origin_0[0] = UINT16_TO_LE(i + 4);
+        seed_A_origin_1[0] = UINT16_TO_LE(i + 5);
+        seed_A_origin_2[0] = UINT16_TO_LE(i + 6);
+        seed_A_origin_3[0] = UINT16_TO_LE(i + 7);
+        shake128_4x((unsigned char*)(A + 4*PARAMS_N), (unsigned char*)(A + 5*PARAMS_N), (unsigned char*)(A + 6*PARAMS_N), (unsigned char*)(A + 7*PARAMS_N), 
+                    (unsigned long long)(2*PARAMS_N), seed_A_separated_0, seed_A_separated_1, seed_A_separated_2, seed_A_separated_3, 2 + BYTES_SEED_A);
+#endif
+#endif       
 
-        for (i = 0; i < PARAMS_NBAR; i++) {
-            __m256i a, b0, b1, b2, b3, acc[PARAMS_N/16];
-            b0 = _mm256_set1_epi16(s[i*PARAMS_N + kk + 0]);       
-            b1 = _mm256_set1_epi16(s[i*PARAMS_N + kk + 1]);        
-            b2 = _mm256_set1_epi16(s[i*PARAMS_N + kk + 2]);        
-            b3 = _mm256_set1_epi16(s[i*PARAMS_N + kk + 3]);
-            for (j = 0; j < PARAMS_N; j+=16) {                  // Matrix-vector multiplication
-                acc[j/16] = _mm256_load_si256((__m256i*)&out[i*PARAMS_N + j]);
-                a = _mm256_load_si256((__m256i*)&a_cols[(t+0)*PARAMS_N + j]);
-                a = _mm256_mullo_epi16(a, b0);
-                acc[j/16] = _mm256_add_epi16(a, acc[j/16]);
-                a = _mm256_load_si256((__m256i*)&a_cols[(t+1)*PARAMS_N + j]);
-                a = _mm256_mullo_epi16(a, b1);
-                acc[j/16] = _mm256_add_epi16(a, acc[j/16]);
-                a = _mm256_load_si256((__m256i*)&a_cols[(t+2)*PARAMS_N + j]);
-                a = _mm256_mullo_epi16(a, b2);
-                acc[j/16] = _mm256_add_epi16(a, acc[j/16]);
-                a = _mm256_load_si256((__m256i*)&a_cols[(t+3)*PARAMS_N + j]);
-                a = _mm256_mullo_epi16(a, b3);
-                acc[j/16] = _mm256_add_epi16(a, acc[j/16]);
+#if !defined(USE_AVX2)
+        for (j = 0; j < PARAMS_NBAR; j++) {
+            uint16_t sum = 0;
+            int16_t sp[8];
+            for (p = 0; p < 8; p++) {
+                sp[p] = s[j*PARAMS_N + i + p];
             }
-
-            for (j = 0; j < PARAMS_N/16; j++) {
-                _mm256_store_si256((__m256i*)&out[i*PARAMS_N + 16*j], acc[j]);
+            for (q = 0; q < PARAMS_N; q++) {
+                sum = e[j*PARAMS_N + q];
+                for (p = 0; p < 8; p++) {
+                    sum += sp[p] * A[p*PARAMS_N + q];
+                }
+                e[j*PARAMS_N + q] = sum;
             }
         }
     }
-#endif
-#endif
+#else  // Using vector intrinsics                   
+        for (j = 0; j < PARAMS_NBAR; j++) {                  
+            __m256i b, sp[8], acc;
+            for (p = 0; p < 8; p++) {
+                sp[p] = _mm256_set1_epi16(s[j*PARAMS_N + i + p]);
+            }
+            for (q = 0; q < PARAMS_N; q+=16) {
+                acc = _mm256_load_si256((__m256i*)&e[j*PARAMS_N + q]);
+                for (p = 0; p < 8; p++) {
+                    b = _mm256_load_si256((__m256i*)&A[p*PARAMS_N + q]);
+                    b = _mm256_mullo_epi16(b, sp[p]);
+                    acc = _mm256_add_epi16(b, acc);
+                }
+                _mm256_store_si256((__m256i*)&e[j*PARAMS_N + q], acc);
+            }
+        }
+    }    
+#endif    
+    memcpy((unsigned char*)out, (unsigned char*)e, 2*PARAMS_N*PARAMS_NBAR);
     
+#if defined(USE_AES128_FOR_A)
+    AES128_free_schedule(aes_key_schedule);
+#endif    
     return 1;
 }
 
