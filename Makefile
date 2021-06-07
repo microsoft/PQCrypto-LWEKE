@@ -16,6 +16,9 @@ else ifeq "$(ARCH)" "x86"
 else ifeq "$(ARCH)" "ARM"
     ARCHITECTURE=_ARM_
     USE_OPT_LEVEL=_FAST_GENERIC_
+else ifeq "$(ARCH)" "PPC"
+    ARCHITECTURE=_PPC_
+    USE_OPT_LEVEL=_FAST_GENERIC_
 endif
 
 ifeq "$(ARCHITECTURE)" "_AMD64_"
@@ -67,8 +70,11 @@ CFLAGS= $(EXTRA_CFLAGS)
 endif
 CFLAGS+= $(VALGRIND_CFLAGS)
 CFLAGS+= -std=gnu11 -Wall -Wextra -DNIX -D $(ARCHITECTURE) -D $(USE_OPT_LEVEL) -D $(USE_GENERATION_A) -D $(USING_OPENSSL)
+ifeq "$(ARCHITECTURE)" "_PPC_"
+else
 ifeq "$(CC)" "gcc"
 CFLAGS+= -march=native
+endif
 endif
 ifeq "$(USE_OPENSSL)" "FALSE"
 LDFLAGS=-lm
