@@ -18,7 +18,7 @@ else ifeq "$(ARCH)" "ARM"
     USE_OPT_LEVEL=_FAST_GENERIC_
 else ifeq "$(ARCH)" "PPC"
     ARCHITECTURE=_PPC_
-    USE_OPT_LEVEL=_FAST_GENERIC_
+    USE_OPT_LEVEL=_REFERENCE_
 endif
 
 ifeq "$(ARCHITECTURE)" "_AMD64_"
