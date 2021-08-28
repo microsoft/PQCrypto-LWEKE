@@ -108,7 +108,7 @@ jobs:
     strategy:
       matrix:
         generation_a: ['AES128', 'SHAKE128']
-        opt_level: ['REFERENCE']
+        opt_level: ['REFERENCE', 'FAST_GENERIC']
     steps:
     - uses: actions/checkout@v2
     - name: Install Docker and QEMU
