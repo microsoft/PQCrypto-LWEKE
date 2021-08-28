@@ -11,7 +11,7 @@
 #include <valgrind/memcheck.h>
 #endif
 
-#ifdef DO_VALGRIND_CHECK
+#if defined(DO_VALGRIND_CHECK) || defined(_PPC_)
 #define KEM_TEST_ITERATIONS   1
 #else
 #define KEM_TEST_ITERATIONS 100

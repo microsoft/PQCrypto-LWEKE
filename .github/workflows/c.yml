@@ -103,3 +103,25 @@ jobs:
       env: 
         DO_VALGRIND_CHECK: "TRUE"
       run: make test1344
+  test-ppc:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        generation_a: ['AES128', 'SHAKE128']
+        opt_level: ['REFERENCE']
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Docker and QEMU
+      run: sudo apt-get install -y qemu
+    - name: Register qemu-user-static
+      run: docker run --rm --privileged multiarch/qemu-user-static:register --reset
+    - name: Run tests in container
+      env:
+        GENERATION_A: ${{ matrix.generation_a }}
+        OPT_LEVEL: ${{ matrix.opt_level }}
+      run: |
+        docker run --rm -v $PWD:$PWD -w $PWD pqclean/ci-container:unstable-ppc /bin/bash -c "\
+        make ARCH=PPC GENERATION_A=${{ matrix.generation_a }} USE_OPENSSL=FALSE OPT_LEVEL=${{ matrix.opt_level }} && \
+        make test640 && \
+        make test976 && \
+        make test1344"

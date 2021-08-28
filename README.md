@@ -123,7 +123,7 @@ $ ./frodo1344/PQCtestKAT_kem_shake
 These are all the available options for compilation:
 
 ```sh
-$ make CC=[gcc/clang] ARCH=[x64/x86/ARM] OPT_LEVEL=[REFERENCE/FAST_GENERIC/FAST] GENERATION_A=[AES128/SHAKE128] USE_OPENSSL=[TRUE/FALSE]
+$ make CC=[gcc/clang] ARCH=[x64/x86/ARM/PPC] OPT_LEVEL=[REFERENCE/FAST_GENERIC/FAST] GENERATION_A=[AES128/SHAKE128] USE_OPENSSL=[TRUE/FALSE]
 ```
 
 Note that the `FAST` option is only available for x64 with support for AVX2 and AES-NI instructions.
