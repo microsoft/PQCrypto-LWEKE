@@ -106,6 +106,9 @@ int crypto_kem_enc(unsigned char *ct, unsigned char *ss, const unsigned char *pk
     VALGRIND_MAKE_MEM_UNDEFINED(mu, BYTES_MU);
 #endif
     shake(G2out, CRYPTO_BYTES + CRYPTO_BYTES, G2in, BYTES_PKHASH + BYTES_MU);
+#ifdef DO_VALGRIND_CHECK
+    VALGRIND_MAKE_MEM_UNDEFINED(pk, CRYPTO_PUBLICKEYBYTES);
+#endif
 
     // Generate Sp and Ep, and compute Bp = Sp*A + Ep. Generate A on-the-fly
     shake_input_seedSE[0] = 0x96;
@@ -145,6 +148,7 @@ int crypto_kem_enc(unsigned char *ct, unsigned char *ss, const unsigned char *pk
     clear_bytes(shake_input_seedSE, 1 + CRYPTO_BYTES);
 #ifdef DO_VALGRIND_CHECK
     VALGRIND_MAKE_MEM_DEFINED(mu, BYTES_MU);
+    VALGRIND_MAKE_MEM_DEFINED(pk, CRYPTO_PUBLICKEYBYTES);
 #endif
     return 0;
 }
@@ -183,6 +187,7 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
 
 #ifdef DO_VALGRIND_CHECK
     VALGRIND_MAKE_MEM_UNDEFINED(sk, CRYPTO_SECRETKEYBYTES);
+    VALGRIND_MAKE_MEM_UNDEFINED(ct, CRYPTO_CIPHERTEXTBYTES);
 #endif
 
     for (size_t i = 0; i < PARAMS_N * PARAMS_NBAR; i++) {
@@ -247,6 +252,7 @@ int crypto_kem_dec(unsigned char *ss, const unsigned char *ct, const unsigned ch
     clear_bytes(shake_input_seedSEprime, 1 + CRYPTO_BYTES);
 #ifdef DO_VALGRIND_CHECK
     VALGRIND_MAKE_MEM_DEFINED(sk, CRYPTO_SECRETKEYBYTES);
+    VALGRIND_MAKE_MEM_DEFINED(ct, CRYPTO_CIPHERTEXTBYTES);
 #endif
     return 0;
 }
