@@ -324,7 +324,7 @@ class FrodoKEM(object):
                 # 3. tmp = dc(K[i][j]) = round(K[i][j] * 2^B / q) mod 2^B
                 # The native implementation of this using normal rounding is as follows:
                 # tmp = round(K[i][j] * (2 ** self.B) / self.q) % (2 ** self.B)
-                # However, this naive using normal rounding should not be used because 
+                # However, this naive technique using normal rounding should not be used because 
                 # floating point errors will lead to incorrect results.
                 # Either of the following two lines produce correct results.
                 # 3.a) tmp = floor(K[i][j] * 2^B / q + 0.5) mod 2^B
