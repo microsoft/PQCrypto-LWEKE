@@ -3,6 +3,7 @@
 # Created by Douglas Stebila
 
 import bitstring
+import math
 import secrets
 import struct
 import warnings
@@ -321,7 +322,15 @@ class FrodoKEM(object):
             # 2. for j = 0; j < nbar; j += 1
             for j in range(self.nbar):
                 # 3. tmp = dc(K[i][j]) = round(K[i][j] * 2^B / q) mod 2^B
-                tmp = round(K[i][j] * (2 ** self.B) / self.q) % (2 ** self.B)
+                # The native implementation of this using normal rounding is as follows:
+                # tmp = round(K[i][j] * (2 ** self.B) / self.q) % (2 ** self.B)
+                # However, this naive using normal rounding should not be used because 
+                # floating point errors will lead to incorrect results.
+                # Either of the following two lines produce correct results.
+                # 3.a) tmp = floor(K[i][j] * 2^B / q + 0.5) mod 2^B
+                tmp = math.floor(K[i][j] * (2 ** self.B) / self.q + 0.5) % (2 ** self.B)
+                # 3.b) tmp = (((K[i][j] << 2^B) + 2^(D-1)) >> D) mod 2^B, where q = 2^D
+                # tmp = (((K[i][j] << self.B) + 2 ** (self.D - 1)) >> self.D) % (2 ** self.B)
                 # 4. tmp' = sum_{l=0}^{B-1} tmp_l * 2^l
                 tmpbits = [0 for l in range(self.B)]
                 for l in range(self.B):

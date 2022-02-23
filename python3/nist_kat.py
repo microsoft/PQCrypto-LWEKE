@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: CC0-1.0
 # Created by Douglas Stebila
 
+import os
 from frodokem import FrodoKEM
 
 class NISTKAT(object):
@@ -23,6 +24,43 @@ class NISTKAT(object):
         print("ss =", ss_e.hex().upper())
         ss_d = kem.kem_decaps(sk, ct)
         assert ss_e.hex() == ss_d.hex(), "Shared secrets not equal"
+        return {
+            'variant': kem.variant,
+            'count': '0',
+            'seed': '<unspecified>',
+            'pk': pk.hex().upper(),
+            'sk': sk.hex().upper(),
+            'ct': ct.hex().upper(),
+            'ss': ss_e.hex().upper()
+        }
+    
+    def check(katvalues, katfile):
+        """Check that KAT values in the dictionary katvalues match those stored in katfile"""
+        with open(os.path.join('..', 'KAT', katfile), 'r') as fh:
+            basekatvalues = dict()
+            basekatvalues['variant'] = fh.readline().replace('#', '').strip()
+            fh.readline()
+            # count
+            a = fh.readline().strip().replace(' = ', ',').split(',')
+            basekatvalues[a[0]] = a[1]
+            # seed
+            a = fh.readline().strip().replace(' = ', ',').split(',')
+            basekatvalues[a[0]] = a[1]
+            # pk
+            a = fh.readline().strip().replace(' = ', ',').split(',')
+            basekatvalues[a[0]] = a[1]
+            # sk
+            a = fh.readline().strip().replace(' = ', ',').split(',')
+            basekatvalues[a[0]] = a[1]
+            # ct
+            a = fh.readline().strip().replace(' = ', ',').split(',')
+            basekatvalues[a[0]] = a[1]
+            # ss
+            a = fh.readline().strip().replace(' = ', ',').split(',')
+            basekatvalues[a[0]] = a[1]
+            for x in ['variant', 'count', 'pk', 'sk', 'ct', 'ss']:
+                assert katvalues[x] == basekatvalues[x], "{:s} not equal".format(x)
+            print("Computed KAT values match for {:s}".format(basekatvalues['variant']))
 
     class NISTRNG(object):
         """Dummy object that contains a serialization of the randombytes outputs that 
@@ -61,9 +99,15 @@ class NISTKAT(object):
 
 if __name__ == "__main__":
     # Run KATs for all supported FrodoKEM variants
-    NISTKAT.run(FrodoKEM('FrodoKEM-640-AES'))
-    NISTKAT.run(FrodoKEM('FrodoKEM-640-SHAKE'))
-    NISTKAT.run(FrodoKEM('FrodoKEM-976-AES'))
-    NISTKAT.run(FrodoKEM('FrodoKEM-976-SHAKE'))
-    NISTKAT.run(FrodoKEM('FrodoKEM-1344-AES'))
-    NISTKAT.run(FrodoKEM('FrodoKEM-1344-SHAKE'))
+    katvalues = NISTKAT.run(FrodoKEM('FrodoKEM-640-AES'))
+    NISTKAT.check(katvalues, 'PQCkemKAT_19888.rsp')
+    katvalues = NISTKAT.run(FrodoKEM('FrodoKEM-640-SHAKE'))
+    NISTKAT.check(katvalues, 'PQCkemKAT_19888_shake.rsp')
+    katvalues = NISTKAT.run(FrodoKEM('FrodoKEM-976-AES'))
+    NISTKAT.check(katvalues, 'PQCkemKAT_31296.rsp')
+    katvalues = NISTKAT.run(FrodoKEM('FrodoKEM-976-SHAKE'))
+    NISTKAT.check(katvalues, 'PQCkemKAT_31296_shake.rsp')
+    katvalues = NISTKAT.run(FrodoKEM('FrodoKEM-1344-AES'))
+    NISTKAT.check(katvalues, 'PQCkemKAT_43088.rsp')
+    katvalues = NISTKAT.run(FrodoKEM('FrodoKEM-1344-SHAKE'))
+    NISTKAT.check(katvalues, 'PQCkemKAT_43088_shake.rsp')
