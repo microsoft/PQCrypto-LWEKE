@@ -32,7 +32,8 @@ int crypto_kem_keypair(unsigned char* pk, unsigned char* sk)
     uint8_t shake_input_seedSE[1 + CRYPTO_BYTES];           // contains secret data
 
     // Generate the secret value s, the seed for S and E, and the seed for the seed for A. Add seed_A to the public key
-    randombytes(randomness, CRYPTO_BYTES + CRYPTO_BYTES + BYTES_SEED_A);
+    if (randombytes(randomness, CRYPTO_BYTES + CRYPTO_BYTES + BYTES_SEED_A) != 0)
+        return 1;
 #ifdef DO_VALGRIND_CHECK
     VALGRIND_MAKE_MEM_UNDEFINED(randomness, CRYPTO_BYTES + CRYPTO_BYTES + BYTES_SEED_A);
 #endif
@@ -101,7 +102,8 @@ int crypto_kem_enc(unsigned char *ct, unsigned char *ss, const unsigned char *pk
 
     // pkh <- G_1(pk), generate random mu, compute (seedSE || k) = G_2(pkh || mu)
     shake(pkh, BYTES_PKHASH, pk, CRYPTO_PUBLICKEYBYTES);
-    randombytes(mu, BYTES_MU);
+    if (randombytes(mu, BYTES_MU) != 0)
+        return 1;
 #ifdef DO_VALGRIND_CHECK
     VALGRIND_MAKE_MEM_UNDEFINED(mu, BYTES_MU);
 #endif

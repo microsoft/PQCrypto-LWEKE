@@ -28,7 +28,7 @@ The library was developed by the [FrodoKEM team](https://frodokem.org/#team) and
     * [`src/random` folder](src/random/): randombytes function using the system random number generator.
     * [`src/sha3` folder](src/sha3/): SHA-3 / SHAKE128 / SHAKE256 implementation.  
 * [`tests` folder](tests/): test files.  
-* [`VisualStudio` folder](VisualStudio/): Visual Studio 2015 files for compilation in Windows.
+* [`VisualStudio` folder](VisualStudio/): Visual Studio 2022 files for compilation in Windows.
 * [`Makefile`](Makefile): Makefile for compilation using the GNU GCC or clang compilers on Unix-like operative systems. 
 * [`LICENSE`](LICENSE): MIT license file.
 * [`README.md`](README.md): this readme file.
@@ -50,7 +50,7 @@ OpenSSL's AES implementation. OpenSSL's AES implementation is used by default.
 
 The FrodoKEM library is supported on a wide range of platforms including x64, x86, ARM and PowerPC devices running Windows, Linux or macOS,
 and supports both little-endian and big-endian formats. 
-We have tested the library with Microsoft Visual Studio 2015, GNU GCC v7.2, and clang v3.8.
+We have tested the library with Microsoft Visual Studio 2022, GNU GCC v7.2, and clang v3.8.
 See instructions below to choose an implementation option and compile on one of the supported platforms.
 
 ## Implementation Options
