@@ -45,6 +45,7 @@
 #define TARGET_x86          2
 #define TARGET_ARM          3
 #define TARGET_PPC          4
+#define TARGET_S390X        5
 
 #if defined(_AMD64_)
     #define TARGET TARGET_AMD64 
@@ -53,7 +54,9 @@
 #elif defined(_ARM_)
     #define TARGET TARGET_ARM
 #elif defined(_PPC_)
-#define TARGET TARGET_PPC
+    #define TARGET TARGET_PPC 
+#elif defined(_S390X_)
+    #define TARGET TARGET_S390X
 #else
     #error -- "Unsupported ARCHITECTURE"
 #endif
@@ -99,7 +102,7 @@
 
 
 // Configuration for endianness
-#if (TARGET == TARGET_PPC) || (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__))
+#if (TARGET == TARGET_PPC || TARGET == TARGET_S390X) || (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__))
     #define LE_TO_UINT16(n) (((((unsigned short)(n) & 0xFF)) << 8) | (((unsigned short)(n) & 0xFF00) >> 8))
     #define UINT16_TO_LE(n) (((((unsigned short)(n) & 0xFF)) << 8) | (((unsigned short)(n) & 0xFF00) >> 8))
 #elif (TARGET == TARGET_x86 || TARGET == TARGET_AMD64) || (defined(__BYTE_ORDER__) && (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__))

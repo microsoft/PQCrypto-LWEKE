@@ -19,6 +19,9 @@ else ifeq "$(ARCH)" "ARM"
 else ifeq "$(ARCH)" "PPC"
     ARCHITECTURE=_PPC_
     USE_OPT_LEVEL=_REFERENCE_
+else ifeq "$(ARCH)" "s390x"
+    ARCHITECTURE=_S390X_
+    USE_OPT_LEVEL=_REFERENCE_
 endif
 
 ifeq "$(ARCHITECTURE)" "_AMD64_"
@@ -70,12 +73,14 @@ CFLAGS= $(EXTRA_CFLAGS)
 endif
 CFLAGS+= $(VALGRIND_CFLAGS)
 CFLAGS+= -std=gnu11 -Wall -Wextra -DNIX -D $(ARCHITECTURE) -D $(USE_OPT_LEVEL) -D $(USE_GENERATION_A) -D $(USING_OPENSSL)
-ifeq "$(ARCHITECTURE)" "_PPC_"
-else
 ifeq "$(CC)" "gcc"
+ifneq "$(ARCHITECTURE)" "_PPC_"
+ifneq "$(ARCHITECTURE)" "_S390X_"
 CFLAGS+= -march=native
 endif
 endif
+endif
+
 ifeq "$(USE_OPENSSL)" "FALSE"
 LDFLAGS=-lm
 else

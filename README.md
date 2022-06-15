@@ -48,7 +48,7 @@ OpenSSL's AES implementation. OpenSSL's AES implementation is used by default.
 
 ## Supported Platforms
 
-The FrodoKEM library is supported on a wide range of platforms including x64, x86, ARM and PowerPC devices running Windows, Linux or macOS,
+The FrodoKEM library is supported on a wide range of platforms including x64, x86, ARM, PowerPC and s390x processors running Windows, Linux or macOS,
 and supports both little-endian and big-endian formats. 
 We have tested the library with Microsoft Visual Studio 2022, GNU GCC v7.2, and clang v3.8.
 See instructions below to choose an implementation option and compile on one of the supported platforms.
@@ -123,7 +123,7 @@ $ ./frodo1344/PQCtestKAT_kem_shake
 These are all the available options for compilation:
 
 ```sh
-$ make CC=[gcc/clang] ARCH=[x64/x86/ARM/PPC] OPT_LEVEL=[REFERENCE/FAST_GENERIC/FAST] GENERATION_A=[AES128/SHAKE128] USE_OPENSSL=[TRUE/FALSE]
+$ make CC=[gcc/clang] ARCH=[x64/x86/ARM/PPC/s390x] OPT_LEVEL=[REFERENCE/FAST_GENERIC/FAST] GENERATION_A=[AES128/SHAKE128] USE_OPENSSL=[TRUE/FALSE]
 ```
 
 Note that the `FAST` option is only available for x64 with support for AVX2 and AES-NI instructions.
