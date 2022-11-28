@@ -533,7 +533,7 @@ class FrodoKEM(object):
         # 9. c1 = Frodo.Pack(B')
         c1 = self.pack(Bprime)
         self.__print_intermediate_value("c1", c1)
-        # 10. E'' = Frodo.SampleMatrix(r[2*mbar*n .. 2*mbar*n + mbar*nbar-1], mbar, n)
+        # 10. E'' = Frodo.SampleMatrix(r[2*mbar*n .. 2*mbar*n + mbar*nbar-1], mbar, nbar)
         Eprimeprime = self.sample_matrix(r[2 * self.mbar * self.n : 2 * self.mbar * self.n + self.mbar * self.nbar], self.mbar, self.nbar)
         self.__print_intermediate_value("E''", Eprimeprime)
         # 11. B = Frodo.Unpack(b, n, nbar)
