@@ -1,0 +1,170 @@
+name: Test C implementation
+
+on:
+  push:
+    paths:
+      - '.github/workflows/c_ephemeral.yml'
+      - Makefile
+      - 'KAT/**'
+      - 'src/**'
+      - 'tests/**'
+  pull_request:
+    paths:
+      - '.github/workflows/c_ephemeral.yml'
+      - Makefile
+      - 'KAT/**'
+      - 'src/**'
+      - 'tests/**'
+
+jobs:
+  test-basic:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        generation_a: ['AES128', 'SHAKE128']
+        opt_level: ['REFERENCE', 'FAST_GENERIC', 'FAST']
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      env: 
+        GENERATION_A: ${{ matrix.generation_a }}
+        OPT_LEVEL: ${{ matrix.opt_level }}
+      run: |
+        cd eFrodoKEM
+        make
+    - name: eFrodo640
+      run: |
+        cd eFrodoKEM
+        make test640
+    - name: eFrodo976
+      run: |
+        cd eFrodoKEM
+        make test976
+    - name: eFrodo1344
+      run: |
+        cd eFrodoKEM
+        make test1344
+    - name: eFrodo640-AES KATs
+      if: ${{ matrix.generation_a == 'AES128' }}
+      run: |
+        cd eFrodoKEM
+        efrodo640/PQCtestKAT_kem
+    - name: eFrodo640-SHAKE KATs
+      if: ${{ matrix.generation_a == 'SHAKE128' }}
+      run: |
+        cd eFrodoKEM
+        efrodo640/PQCtestKAT_kem_shake
+    - name: eFrodo976-AES KATs
+      if: ${{ matrix.generation_a == 'AES128' }}
+      run: |
+        cd eFrodoKEM
+        efrodo976/PQCtestKAT_kem
+    - name: eFrodo976-SHAKE KATs
+      if: ${{ matrix.generation_a == 'SHAKE128' }}
+      run: |
+        cd eFrodoKEM
+        efrodo976/PQCtestKAT_kem_shake
+    - name: eFrodo1344-AES KATs
+      if: ${{ matrix.generation_a == 'AES128' }}
+      run: |
+        cd eFrodoKEM
+        efrodo1344/PQCtestKAT_kem
+    - name: eFrodo1344-SHAKE KATs
+      if: ${{ matrix.generation_a == 'SHAKE128' }}
+      run: |
+        cd eFrodoKEM
+        efrodo1344/PQCtestKAT_kem_shake
+  test-sanitize:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        generation_a: ['AES128', 'SHAKE128']
+        opt_level: ['REFERENCE', 'FAST_GENERIC', 'FAST']
+        sanitizer: ['address', 'undefined']
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build
+      env:
+        GENERATION_A: ${{ matrix.generation_a }}
+        OPT_LEVEL: ${{ matrix.opt_level }}
+        EXTRA_CFLAGS: -g3 -fno-omit-frame-pointer -fno-optimize-sibling-calls -fsanitize-address-use-after-scope -fsanitize=${{ matrix.sanitizer }} -fno-sanitize-recover=${{ matrix.sanitizer }}
+      run: |
+        cd eFrodoKEM
+        make CC=clang-13
+    - name: eFrodo640
+      run: |
+        cd eFrodoKEM
+        efrodo640/test_KEM nobench
+    - name: eFrodo976
+      run: |
+        cd eFrodoKEM
+        efrodo976/test_KEM nobench
+    - name: eFrodo1344
+      run: |
+        cd eFrodoKEM
+        efrodo1344/test_KEM nobench
+  test-valgrind-constant-time:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        generation_a: ['AES128', 'SHAKE128']
+        opt_level: ['REFERENCE', 'FAST_GENERIC', 'FAST']
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install valgrind
+      run: |
+        cd eFrodoKEM
+        sudo apt-get install -y valgrind
+    - name: Build
+      env:
+        DO_VALGRIND_CHECK: "TRUE"
+        GENERATION_A: ${{ matrix.generation_a }}
+        OPT_LEVEL: ${{ matrix.opt_level }}
+      run: |
+        cd eFrodoKEM
+        make CC=clang-13
+    - name: eFrodo640
+      env: 
+        DO_VALGRIND_CHECK: "TRUE"
+      run: |
+        cd eFrodoKEM
+        make test640
+    - name: eFrodo976
+      env: 
+        DO_VALGRIND_CHECK: "TRUE"
+      run: |
+        cd eFrodoKEM
+        make test976
+    - name: eFrodo1344
+      env: 
+        DO_VALGRIND_CHECK: "TRUE"
+      run: |
+        cd eFrodoKEM
+        make test1344
+  test-ppc:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        generation_a: ['AES128', 'SHAKE128']
+        opt_level: ['REFERENCE']
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Docker and QEMU
+      run: |
+        cd eFrodoKEM
+        sudo apt-get install -y qemu
+    - name: Register qemu-user-static
+      run: |
+        cd eFrodoKEM
+        docker run --rm --privileged multiarch/qemu-user-static:register --reset
+    - name: Run tests in container
+      env:
+        GENERATION_A: ${{ matrix.generation_a }}
+        OPT_LEVEL: ${{ matrix.opt_level }}
+      run: |
+        cd eFrodoKEM
+        docker run --rm -v $PWD:$PWD -w $PWD pqclean/ci-container:unstable-ppc /bin/bash -c "\
+        make ARCH=PPC GENERATION_A=${{ matrix.generation_a }} USE_OPENSSL=FALSE OPT_LEVEL=${{ matrix.opt_level }} && \
+        make test640 && \
+        make test976 && \
+        make test1344"

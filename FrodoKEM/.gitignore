@@ -1,0 +1,19 @@
+## Ignore temporary files and build results
+
+# User-specific files
+*.suo
+*.user
+
+# Build results
+Debug/
+Win32/
+x64/
+/frodo640
+/frodo976
+/frodo1344
+objs/
+
+# Visual Studio cache directory and files
+.vs/
+*.VC.db
+*.VC.VC.opendb

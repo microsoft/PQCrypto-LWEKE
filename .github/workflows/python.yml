@@ -14,10 +14,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: Install prerequisites
-      run: pip3 install bitstring cryptography
+      run: |
+        cd FrodoKEM
+        pip3 install bitstring cryptography
     - name: Run basic test
       run: |
-        cd python3
+        cd FrodoKEM/python3
         python3 nist_kat.py
