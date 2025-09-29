@@ -30,7 +30,9 @@ The library was developed by the [FrodoKEM team](https://frodokem.org/#team) and
 
 ## Contents
 
+* [`common` folder](common/): random functions, implementations of AES and SHA-3.
 * [`eFrodoKEM` folder](eFrodoKEM/): C and Python3 implementations of eFrodoKEM.
+* [`estimates` folder](estimates/): cryptanalysis estimates of FrodoKEM reported in [3].
 * [`FrodoKEM` folder](FrodoKEM/): C and Python3 implementations of standard FrodoKEM.
 * [`LICENSE`](LICENSE): MIT license file.
 * [`README.md`](README.md): this readme file.
@@ -47,12 +49,12 @@ This software is licensed under the MIT License; see the LICENSE file for detail
 The Python3 implementation is licensed under the Creative Commons Zero v1.0 Universal license.
 It includes some third party modules that are licensed differently. In particular:
 
-- `<FrodoKEM_variant>/src/aes/aes_c.c`: public domain
-- `<FrodoKEM_variant>/src/aes/aes_ni.c`: public domain
-- `<FrodoKEM_variant>/src/sha3/fips202.c`: public domain
-- `<FrodoKEM_variant>/src/sha3/fips202x4.c`: public domain
-- `<FrodoKEM_variant>/src/sha3/keccak4x`: all files in this folder are public domain ([CC0](http://creativecommons.org/publicdomain/zero/1.0/)), excepting
-- `<FrodoKEM_variant>/src/sha3/keccak4x/brg_endian.h` which is copyrighted by Brian Gladman and comes with a BSD 3-clause license.
+- `common/aes/aes_c.c`: public domain
+- `common/aes/aes_ni.c`: public domain
+- `common/sha3/fips202.c`: public domain
+- `common/sha3/fips202x4.c`: public domain
+- `common/sha3/keccak4x`: all files in this folder are public domain ([CC0](http://creativecommons.org/publicdomain/zero/1.0/)), excepting
+- `common/sha3/keccak4x/brg_endian.h` which is copyrighted by Brian Gladman and comes with a BSD 3-clause license.
 - `<FrodoKEM_variant>/tests/ds_benchmark.h`: public domain
 - `<FrodoKEM_variant>/tests/PQCtestKAT_kem<#>.c`: copyrighted by Lawrence E. Bassham 
 - `<FrodoKEM_variant>/tests/PQCtestKAT_kem<#>_shake.c`: copyrighted by Lawrence E. Bassham
@@ -65,9 +67,10 @@ It includes some third party modules that are licensed differently. In particula
 
 [2]  Joppe W. Bos, Craig Costello, Léo Ducas, Ilya Mironov, Michael Naehrig, Valeria Nikolaenko, Ananth Raghunathan, and Douglas Stebila, 
 "Frodo: Take off the ring! Practical, quantum-secure key exchange from LWE". 
-ACM CCS 2016, 2016. The preprint version is available [`here`](http://eprint.iacr.org/2016/659). 
+ACM CCS 2016, 2016. The preprint version is available [`here`](http://eprint.iacr.org/2016/659).
 
-[3]  FrodoKEM team, "FrodoKEM: Learning With Errors Key Encapsulation - Preliminary Draft Standards". Submission to ISO/IEC JTC1/SC27/WG2, 2023. The preliminary draft is available [`here`](https://frodokem.org/files/FrodoKEM-ISO-20230314.pdf).
+[3] Lewis Glabush, Patrick Longa, Michael Naehrig, Chris Peikert, Douglas Stebila, and Fernando Virdia,
+"FrodoKEM: A CCA-Secure Learning With Errors Key Encapsulation Mechanism". IACR Communications in Cryptology (to appear), 2025.
 
 # Contributing
 
