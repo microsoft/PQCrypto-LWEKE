@@ -24,7 +24,7 @@ jobs:
         generation_a: ['AES128', 'SHAKE128']
         opt_level: ['REFERENCE', 'FAST_GENERIC', 'FAST']
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2.8.0
     - name: Build
       env: 
         GENERATION_A: ${{ matrix.generation_a }}
@@ -82,7 +82,7 @@ jobs:
         opt_level: ['REFERENCE', 'FAST_GENERIC', 'FAST']
         sanitizer: ['address', 'undefined']
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2.8.0
     - name: Build
       env:
         GENERATION_A: ${{ matrix.generation_a }}
@@ -110,7 +110,7 @@ jobs:
         generation_a: ['AES128', 'SHAKE128']
         opt_level: ['REFERENCE', 'FAST_GENERIC', 'FAST']
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2.8.0
     - name: Install valgrind
       run: |
         cd eFrodoKEM
@@ -148,7 +148,7 @@ jobs:
         generation_a: ['AES128', 'SHAKE128']
         opt_level: ['REFERENCE']
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@0717577d45739eb3c851188b29f50ed6c0b2194e # v2.8.0
     - name: Install Docker and QEMU
       run: |
         cd eFrodoKEM
