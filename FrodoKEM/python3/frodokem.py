@@ -337,7 +337,7 @@ class FrodoKEM(object):
                 # Either of the following two lines produce correct results.
                 #     3.a) tmp = floor(K[i][j] * 2^B / q + 0.5) mod 2^B
                 tmp = math.floor(K[i][j] * (2 ** self.B) / self.q + 0.5) % (2 ** self.B)
-                #     3.b) tmp = (((K[i][j] << 2^B) + 2^(D-1)) >> D) mod 2^B, where q = 2^D
+                #     3.b) tmp = (((K[i][j] << B) + 2^(D-1)) >> D) mod 2^B, where q = 2^D
                 #tmp = (((K[i][j] << self.B) + 2 ** (self.D - 1)) >> self.D) % (2 ** self.B)
                 # 4. tmp' = sum_{l=0}^{B-1} tmp_l * 2^l
                 tmpbits = [0 for l in range(self.B)]
@@ -524,8 +524,8 @@ class FrodoKEM(object):
         self.__print_intermediate_value("seedSE", seedSE)
         k = seedSE_k[self.len_seedSE_bytes:self.len_seedSE_bytes + self.len_k_bytes]
         self.__print_intermediate_value("k", k)
-        # 4. r = SHAKE(0x96 || seedSE, 2*mbar*n + mbar*nbar*len_chi) (length in bits)
-        rbytes = self.shake(bytes(b'\x96') + seedSE, (2 * self.mbar * self.n + self.mbar * self.mbar) * self.len_chi_bytes)
+        # 4. r = SHAKE(0x96 || seedSE, (2*mbar*n + mbar*nbar)*len_chi) (length in bits)
+        rbytes = self.shake(bytes(b'\x96') + seedSE, (2 * self.mbar * self.n + self.mbar * self.nbar) * self.len_chi_bytes)
         r = [struct.unpack_from('<H', rbytes, 2*i)[0] for i in range(2 * self.mbar * self.n + self.mbar * self.nbar)]
         self.__print_intermediate_value("r", r)
         # 5. S' = Frodo.SampleMatrix(r[0 .. mbar*n-1], mbar, n)
@@ -623,8 +623,8 @@ class FrodoKEM(object):
         self.__print_intermediate_value("seedSE'", seedSEprime)
         kprime = seedSEprime_kprime[self.len_seedSE_bytes:self.len_seedSE_bytes + self.len_k_bytes]
         self.__print_intermediate_value("k'", kprime)
-        # 7. r = SHAKE(0x96 || seedSE', 2*mbar*n + mbar*nbar*len_chi) (length in bits)
-        rbytes = self.shake(bytes(b'\x96') + seedSEprime, (2 * self.mbar * self.n + self.mbar * self.mbar) * self.len_chi_bytes)
+        # 7. r = SHAKE(0x96 || seedSE', (2*mbar*n + mbar*nbar)*len_chi) (length in bits)
+        rbytes = self.shake(bytes(b'\x96') + seedSEprime, (2 * self.mbar * self.n + self.mbar * self.nbar) * self.len_chi_bytes)
         r = [struct.unpack_from('<H', rbytes, 2*i)[0] for i in range(2 * self.mbar * self.n + self.mbar * self.nbar)]
         self.__print_intermediate_value("r", r)
         # 8. S' = Frodo.SampleMatrix(r[0 .. mbar*n-1], mbar, n)
@@ -638,7 +638,7 @@ class FrodoKEM(object):
         # 11. B'' = S' A + E'
         Bprimeprime = self.__matrix_add(self.__matrix_mul(Sprime, A), Eprime)
         self.__print_intermediate_value("B''", Bprimeprime)
-        # 12. E'' = Frodo.SampleMatrix(r[2*mbar*n .. 2*mbar*n + mbar*nbar-1], mbar, n)
+        # 12. E'' = Frodo.SampleMatrix(r[2*mbar*n .. 2*mbar*n + mbar*nbar-1], mbar, nbar)
         Eprimeprime = self.sample_matrix(r[2 * self.mbar * self.n : 2 * self.mbar * self.n + self.mbar * self.nbar], self.mbar, self.nbar)
         self.__print_intermediate_value("E''", Eprimeprime)
         # 13. B = Frodo.Unpack(b, n, nbar)
